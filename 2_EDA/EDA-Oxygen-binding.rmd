@@ -1,0 +1,48 @@
+---
+title: "EDA-Oxygen-binding.rmd"
+author: "Matthew Curcio"
+date: "March 18, 2019"
+output: html_document
+---
+
+## Title: EDA-Oxygen-binding.rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data:
+```{r}
+
+
+```
+
+```{r}
+start_time <- Sys.time() # Start timer
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

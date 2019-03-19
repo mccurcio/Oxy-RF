@@ -9,5 +9,6 @@ UseSpacesForTab: Yes
 NumSpacesForTab: 4
 Encoding: UTF-8
 
-RnwWeave: Sweave
+RnwWeave: knitr
 LaTeX: pdfLaTeX
+RootDocument: 2_EDA/complete_aa.csv

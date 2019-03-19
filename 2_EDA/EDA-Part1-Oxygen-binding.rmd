@@ -1,0 +1,161 @@
+---
+title: "EDA-Part1-Oxygen-binding.rmd"
+author: "Matthew Curcio"
+date: "March 18, 2019"
+output: html_document
+---
+
+## File Name: EDA-Part1-Oxygen-binding.rmd
+
+### Summary: 
+One important question which I would like to answer with an exploratory
+data analysis is this data set sufficient to succesfully classify the seven classes of protein using a Random Forest machine learning approach? This should clearer as we test and further describe the data.
+
+| Code Key | Protein Class  |
+|:---------|:---------------|
+| 0 / Ctrl | Controls consist of human proteins which do not bind oxygen |
+| 1 / Ery  | Erythrocruorin |
+| 2 / Hcy  | Hemocyanin     |
+| 3 / Hgb  | Hemoglobin     |
+| 4 / Hhe  | Hemerythrin    |
+| 5 / Lgb  | Leghemoglobin  |
+| 6 / Mgb  | Myoglobin      |
+
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "psych", "knitr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+#### A. Load Data
+Import Single Amino Acid percent composition for first round of Exploratory Data Analysis.
+```{r load_data, message=FALSE, warning=FALSE, include=TRUE}
+complete_aa <- read_csv("complete_aa.csv")
+```
+
+
+#### B. Check Data Head
+```{r}
+head(complete_aa)
+```
+
+
+#### C. Check Data Tail
+```{r}
+tail(complete_aa)
+```
+
+
+#### D. Find Dimensions:
+The dataset consists of 22 variables and 16,952 observations, consisting of 7 classes, (0:6).
+```{r dim}
+dim(complete_aa)
+```
+
+
+#### E. Examine Data Structure: 
+Note: Class is a numerical value and must be converted to a categorical before analysis.
+```{r str}
+str(complete_aa)
+```
+
+
+#### F. Convert Class To Factor
+Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
+```{r factor}
+prot_class <- as.factor(complete_aa$Class)
+
+typeof(complete_aa$Class)
+class(complete_aa$Class)
+```
+
+
+#### G. Produce Summary
+Produce Summary information for all 22 columns.
+The `summary` command produces a 6 number summary.
+```{r summary}
+summary(complete_aa$TotalAA)
+```
+
+
+#### H. Using Package "psych::describe" commands
+Using 'describe' we are able to investigate the first four moments. 
+
+For brevity, we will calculate 2 amino acids (R, H)
+
+| Single Letter | Amino Acid |
+|:--------------|:-----------|
+| R             | Arginine   |
+| H             | Histidine  |
+
+
+```{r arginine}
+describe(complete_aa$R)
+```
+
+```{r histidine}
+describe(complete_aa$H)
+```
+
+
+#### I. Testing for Missing Data
+
+In R, missing values are represented by 'NA' (not available). 
+This is not to be confused with impossible values (e.g., dividing by zero) are represented by 'NaN' (not a number). 
+```{r}
+kable(sapply(complete_aa, function(x) sum(is.na(x))))
+```
+There are NO missing values in any of the 22 features.
+
+
+#### J. Principle Component Analysis: `princomp`
+
+`princomp` has a component called `sdev` that is the "Standard deviation" for the dataframes features, therefore we can calculate variance.
+```{r}
+aa_PCA = princomp(complete_aa[,3:22])
+
+aa_PCA$sdev^2
+```
+
+The proportion of variance is the variance divided by the sum of all variances. 
+```{r include=FALSE}
+aa_PCA$sdev^2 / sum(aa_PCA$sdev^2)
+```
+
+The Cumulative Proportion is the cumulative sum of the proportion of variance.
+```{r}
+cumsum(aa_PCA$sdev^2 / sum(aa_PCA$sdev^2))
+```
+
+Now you have the Cumulative Proportion values, just plot them. 
+```{r}
+plot(cumsum(aa_PCA$sdev^2 / sum(aa_PCA$sdev^2)), 
+     main = "Cumulative Proportion of varainces of all 20 Amino Acids(AA)",
+     xlab = "Principal Component",
+     ylab = "Proportion of AA",
+     ylim = c(0,1),
+     type="b")
+```
+
+The contribution of each amino acid is hard to discern from this graphic alone, therefore  I will use another library to investigate further.
+
+---
+
+#### K. Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF
