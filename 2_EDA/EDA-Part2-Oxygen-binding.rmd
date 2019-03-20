@@ -1,0 +1,139 @@
+---
+title: "EDA-Part2-Oxygen-binding.rmd"
+author: "Matthew Curcio"
+date: "March 18, 2019"
+output: html_document
+---
+
+## File Name: EDA-Part2-Oxygen-binding.rmd
+
+### Summary: 
+One important question which I would like to answer with an exploratory
+data analysis is this data set sufficient to succesfully classify the seven classes of protein using a Random Forest machine learning approach? This should clearer as we test and further describe the data.
+
+| Code Key | Protein Class  |
+|:---------|:---------------|
+| 0 / Ctrl | Controls consist of human proteins which do not bind oxygen |
+| 1 / Ery  | Erythrocruorin |
+| 2 / Hcy  | Hemocyanin     |
+| 3 / Hgb  | Hemoglobin     |
+| 4 / Hhe  | Hemerythrin    |
+| 5 / Lgb  | Leghemoglobin  |
+| 6 / Mgb  | Myoglobin      |
+
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "knitr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+#### A. Load Data
+Import Single Amino Acid percent composition for first round of Exploratory Data Analysis.
+```{r load_data, message=FALSE, warning=FALSE, include=TRUE}
+complete_aa <- read_csv("complete_aa.csv")
+```
+
+
+#### B. Convert Class To Factor
+Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
+```{r factor}
+prot_class <- as.factor(complete_aa$Class)
+
+typeof(complete_aa$Class)
+class(complete_aa$Class)
+```
+
+
+#### C. Plot Variances vs Amino Acid
+
+```{r}
+aa_vars = apply(complete_aa[,3:22], 2, var)
+aa_vars_sorted = sort(10^5*aa_vars, decreasing = TRUE)
+aa_vars_sorted
+```
+
+#### C.II Plot of Variances
+```{r}
+aa_names <- c("P", "L", "K", "E", "G", 
+              "A", "S", "R", "C", "Q", 
+              "I", "V", "T", "D", "F", 
+              "N", "H", "Y", "M", "W") 
+
+plot(aa_vars_sorted,
+     main = "Plot of Variances (*10^5) Vs Amino Acid Type",
+     ylab = "Variances (*10^5)",
+     xlab = "Amino Acid Type",
+     ylim =  c(0,100),
+     xaxt = "n")
+axis(1, at = 1:20, labels = aa_names)
+
+```
+
+
+#### D. Plot Means vs Amino Acids
+```{r}
+aa_means = apply(complete_aa[,3:22], 2, mean)
+aa_means_sorted = sort(100*aa_means, decreasing = TRUE)
+aa_means_sorted
+```
+
+```{r}
+
+```
+
+
+The proportion of variance is the variance divided by the sum of all variances. 
+```{r include=FALSE}
+aa_PCA = princomp(complete_aa[, 3:22])
+names(aa_PCA)
+```
+
+```{r}
+colnames(aa_vars)
+```
+
+
+
+If we look at the centers of the column (means) this may give some ideas.
+```{r}
+aa_PCA_sorted <- sort(100*aa_PCA$center, decreasing = TRUE)
+aa_PCA_sorted$loadings
+
+plot(aa_PCA_sorted)
+```
+
+
+
+
+Now we have the Proportions of each amino acid to the whole. So we can now plot them. 
+```{r}
+plot(aa_PCA$sdev^2 / sum(aa_PCA$sdev^2), 
+     main = "Cumulative Proportion of varainces of all 20 Amino Acids(AA)",
+     xlab = "Principal Component",
+     ylab = "Proportion of AA",
+     ylim = c(0,1),
+     type="b")
+```
+
+The contribution of each amino acid is hard to discern from this graphic alone, therefore  I will use another library to investigate further.
+
+---
+
+#### K. Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF
