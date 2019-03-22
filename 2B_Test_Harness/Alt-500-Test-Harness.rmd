@@ -1,0 +1,56 @@
+---
+title: "Gen-500-Test-Harness.rmd"
+author: "Matthew Curcio"
+date: "March 21, 2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Title: Alt-500-Test-Harness.rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+```{r}
+start_time <- Sys.time() # Start timer
+
+prot_list <- list.files(pattern = ".txt$")
+test_file_name <- paste("7_class_500_test_harness_", format(Sys.time(), "%Y-%m-%d_%I-%M-%S-%p"), ".lst", sep = "")
+
+for (i in 1:length(prot_list)) {
+    line_count <- length(readLines(prot_list[i]))
+    print(prot_list[i])
+    for (j in 1:500) {
+        choose_index <- floor(runif(1, min = 1, max = line_count)-1)
+        one_line <- read_lines(prot_list[i], skip = choose_index, n_max = 1)
+        write_lines(one_line, path = test_file_name, sep = "\n", append = TRUE)
+    }
+}
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

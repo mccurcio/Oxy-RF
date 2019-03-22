@@ -44,13 +44,11 @@ complete_aa <- read_csv("complete_aa.csv")
 ```
 
 
-#### B. Convert Class To Factor
-Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
-```{r factor}
-prot_class <- as.factor(complete_aa$Class)
+#### B. Number of Proteins Per Class
 
-typeof(complete_aa$Class)
-class(complete_aa$Class)
+```{r}
+class_table <- table(complete_aa$Class)
+knitr::kable(class_table)
 ```
 
 
@@ -62,7 +60,8 @@ aa_vars_sorted = sort(10^5*aa_vars, decreasing = TRUE)
 aa_vars_sorted
 ```
 
-#### C.II Plot of Variances
+
+#### D. Plot of Variances
 ```{r}
 aa_names <- c("P", "L", "K", "E", "G", 
               "A", "S", "R", "C", "Q", 
@@ -70,66 +69,37 @@ aa_names <- c("P", "L", "K", "E", "G",
               "N", "H", "Y", "M", "W") 
 
 plot(aa_vars_sorted,
-     main = "Plot of Variances (*10^5) Vs Amino Acid Type",
-     ylab = "Variances (*10^5)",
+     main = "Plot of Variances (x 10^5) Vs Amino Acid Type",
+     ylab = "Variances (x 10^5)",
      xlab = "Amino Acid Type",
      ylim =  c(0,100),
      xaxt = "n")
 axis(1, at = 1:20, labels = aa_names)
-
 ```
 
 
-#### D. Plot Means vs Amino Acids
+#### E. % Means vs Amino Acids
 ```{r}
 aa_means = apply(complete_aa[,3:22], 2, mean)
 aa_means_sorted = sort(100*aa_means, decreasing = TRUE)
 aa_means_sorted
 ```
 
+
+#### F. Plot of Means (% of Total) Vs Amino Acid Type 
 ```{r}
-
+plot(aa_means_sorted,
+     main = "Plot of Means (% of Total) Vs Amino Acid Type",
+     ylab = "Means % of Total)",
+     xlab = "Amino Acid Type",
+     ylim =  c(0,10),
+     xaxt = "n")
+axis(1, at = 1:20, labels = aa_names)
 ```
-
-
-The proportion of variance is the variance divided by the sum of all variances. 
-```{r include=FALSE}
-aa_PCA = princomp(complete_aa[, 3:22])
-names(aa_PCA)
-```
-
-```{r}
-colnames(aa_vars)
-```
-
-
-
-If we look at the centers of the column (means) this may give some ideas.
-```{r}
-aa_PCA_sorted <- sort(100*aa_PCA$center, decreasing = TRUE)
-aa_PCA_sorted$loadings
-
-plot(aa_PCA_sorted)
-```
-
-
-
-
-Now we have the Proportions of each amino acid to the whole. So we can now plot them. 
-```{r}
-plot(aa_PCA$sdev^2 / sum(aa_PCA$sdev^2), 
-     main = "Cumulative Proportion of varainces of all 20 Amino Acids(AA)",
-     xlab = "Principal Component",
-     ylab = "Proportion of AA",
-     ylim = c(0,1),
-     type="b")
-```
-
-The contribution of each amino acid is hard to discern from this graphic alone, therefore  I will use another library to investigate further.
 
 ---
 
-#### K. Machine Settings:
+#### G. Machine Settings:
 ```{r}
 Sys.info()[c(1:3,5)]
 ```

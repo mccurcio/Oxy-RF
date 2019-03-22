@@ -29,6 +29,18 @@ for(p in Libraries){
 }
 ```
 
+
+#### A. Create index of 500 given input = number of lines of protein class
+
+```{r}
+generate_index <- function(line_count){
+    index <- sample.int(line_count, n = 500, replace = TRUE)
+}
+```
+
+
+
+
 ```{r}
 processFile = function(filename) {
     on = file(filename, "r")
@@ -64,7 +76,7 @@ find_line_counts <- function(){
         print(i)
         line_count <- length(readLines(prot_list[7]))
         print(paste(prot_list[7], "=", line_count, "lines.", sep = " "))
-        index <- sample.int(line_count, n = 500, replace = TRUE)
+        
         choose_lines_from_index(index)
     }
 }
