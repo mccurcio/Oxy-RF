@@ -1,0 +1,120 @@
+---
+title: "Produce_Single_AA_Percent_Composition_Gamma.rmd"
+author: "Matthew Curcio"
+date: "March 25, 2019"
+output: html_document
+---
+
+## Title: Produce_Single_AA_Percent_Composition_Gamma .rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "stringr", "dplyr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE)) {install.packages(p)}
+    library(p, character.only = TRUE)
+}
+```
+
+#### Import polypeptide strings line by line
+```{r}
+import_polypeptide_line <- function(FILE_2_RUN) {
+    con <- file(description = FILE_2_RUN, open = "r") # Create connection
+    # Find number of lines from source file
+    bash_com <- paste("wc -l ", FILE_2_RUN, " | awk '{ print $1 }'", sep="")
+    n <- system(command = bash_com, intern = TRUE)
+    ## Loop over a file connection
+    for(i in 1:n) {
+        line_2_process <- scan(file = con, 
+                               what = character(), 
+                               nlines = 1, 
+                               quiet = T, 
+                               text)
+        linear_pp_to_percent_aa(line_2_process) # Process polypeptides to paa.
+    }
+}
+```
+
+#### Initialize file
+```{r}
+initialize_file <- function() {
+    col_titles = t(c("Class", "id", "TotalAA", 
+                 "G", "P", "A", "V", "L",
+                 "I", "M", "C", "F", "Y",
+                 "W", "H", "K", "R", "Q",
+                 "N", "E", "D", "S", "T"))
+    file_name <- paste("test_harness", "_paa.csv", sep = "")
+    write.table(col_titles,
+                file_name,
+                sep = ",",
+                col.names = FALSE,
+                row.names = FALSE,
+               eol = "\n")
+}
+
+initialize_file()
+```
+
+#### Produce % AA Composition from linear polypeptides
+```{r}
+linear_pp_to_percent_aa <- function(line_2_process) {
+    # Initialize column naming conventions
+    aa_vector = as.vector(matrix(0, ncol = 23))
+    code_key <- c("Ctrl", "Ery", "Hcy", "Hgb", "Hhe", "Lgb", "Mgb")
+    amino_acids = t(c("G", "P", "A", "V", "L", "I", "M", "C", "F", "Y",
+                      "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T"))
+    # Loop over 7 Code-Keys to apply "Class" and "id"
+    for (i in code_key) {
+        # For this test-harness file each 500 lines in a 'Class'
+        for (j in 1:500) {
+            # First column is protein 'Class'
+            aa_vector[1] = i
+            # Second column is 'id'
+            aa_vector[2] = paste(code_key, j, sep = "-")
+            # Third column is 'TotalAA'
+            total_aa = nchar(line_2_process,
+                             type = "chars",
+                             keepNA = FALSE)
+            aa_vector[3] = total_aa
+            # Columns 4:23 - Calculate percent AA per line
+            for (k in 4:23) {
+                aa_vector[k] = str_count(line_2_process[1, row], k-4) / total_aa
+            }
+            aa_nums = t(aa_nums)
+        }
+        }
+}
+```
+
+
+### MAIN
+```{r}
+start_time <- Sys.time() # Start timer
+
+FILE_2_RUN <- "7_class_500_test_harness_2019-03-22_12-33-09-AM.lst"
+
+setwd("~/Dropbox/Oxy-RF/2B_Test_Harness/Test-Harness-2-PAA")
+
+initialize_file()
+import_polypeptide_line(FILE_2_RUN)
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF
