@@ -7,9 +7,9 @@ output: html_document
 
 ## Title: Produce_Single_AA_Percent_Composition_Gamma .rmd
 
-#### Summary: 
+### Summary: This program produces a test-harness file. This program takes a protein sequence from a randomly sampled file of 500 polypeptides from lists of oxygern binding proteins. This program converts the linear polypeptide sequence to a percent amino acid composition. 
 
-Libraries:
+#### Libraries:
 ```{r libraries, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -22,7 +22,7 @@ for(p in Libraries){
 }
 ```
 
-#### Import polypeptide strings line by line
+#### Import polypeptide strings line by line:
 ```{r}
 import_polypeptide_line <- function(FILE_2_RUN) {
     con <- file(description = FILE_2_RUN, open = "r") # Create connection
@@ -37,14 +37,14 @@ import_polypeptide_line <- function(FILE_2_RUN) {
                                quiet = T, 
                                text)
         #print(line_2_process)
-        linear_pp_to_percent_aa(line_2_process, n) # Process polypeptides to paa.
+        linear_pp_to_percent_aa(line_2_process, i) # Process polypeptides to paa.
     }
 }
 
 #import_polypeptide_line(file) ## It Works
 ```
 
-#### Initialize file
+#### Initialize file 'test_harness_paa.csv':
 ```{r}
 initialize_file <- function() {
     col_titles = t(c("Class", "id", "TotalAA", 
@@ -64,39 +64,38 @@ initialize_file <- function() {
 #initialize_file()
 ```
 
-#### Produce % AA Composition from linear polypeptides
+#### Produce % AA Composition from linear polypeptides:
 ```{r}
-linear_pp_to_percent_aa <- function(line_2_process, n) {
+linear_pp_to_percent_aa <- function(line_2_process, i) {
     aa_vector = as.vector(matrix(0, ncol = 23))
     code_key <- c("Ctrl", "Ery", "Hcy", "Hgb", "Hhe", "Lgb", "Mgb")
     amino_acids = c("G", "P", "A", "V", "L", "I", "M", "C", "F", "Y",
                     "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T")
     # First column is protein 'Class'
-    if (n < 501) {
+    if (i < 501) {
         (aa_vector[1] <- "Ctrl")
-    } else if (n < 1001) {
+    } else if (i < 1001) {
         (aa_vector[1] <- "Ery")
-    } else if (n < 1501) {
+    } else if (i < 1501) {
         (aa_vector[1] <- "Hcy")
-    } else if (n < 2001) {
+    } else if (i < 2001) {
         (aa_vector[1] <- "Hgb")
-    } else if (n < 2501) {
+    } else if (i < 2501) {
         (aa_vector[1] <- "Hhe")
-    } else if (n < 3001) {
+    } else if (i < 3001) {
         (aa_vector[1] <- "Lgb")
     } else {
         (aa_vector[1] <- "Mgb")
     }
     # Second column is 'id'
-    aa_vector[2] = paste("P", n, sep = "")
+    aa_vector[2] = paste("P", i, sep = "")
     # Third column is 'TotalAA'
     total_aa = nchar(line_2_process, keepNA = FALSE)
     aa_vector[3] = total_aa
     # Columns 4:23 - Calculate % AA per line
-    for (k in 1:20) {
-        aa_vector[k] = str_count(line_2_process, pattern = amino_acids[k]) / total_aa
+    for (k in 4:23) {
+        aa_vector[k] = str_count(line_2_process, pattern = amino_acids[k-3]) / total_aa
     }
-    line_2_write <- cbi
     write(x = aa_vector,
           file = "test_harness_paa.csv", 
           append = TRUE, 
@@ -106,7 +105,7 @@ linear_pp_to_percent_aa <- function(line_2_process, n) {
 ```
 test_harness_paa.csv
 
-### MAIN
+### MAIN:
 ```{r}
 start_time <- Sys.time() # Start timer
 
@@ -120,8 +119,6 @@ import_polypeptide_line(FILE_2_RUN)
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
-
-
 
 Machine Settings:
 ```{r}
