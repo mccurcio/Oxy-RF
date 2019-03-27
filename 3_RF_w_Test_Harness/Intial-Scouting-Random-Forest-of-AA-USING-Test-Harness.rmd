@@ -1,15 +1,15 @@
 ---
-title: "Random Forest of AA.rmd"
+title: "Intial Scouting-Random Forest of AA USING Tesst-Harness.rmd"
 author: "Matthew Curcio"
 date: "March 20, 2019"
 output: html_document
 ---
 
-## Title: Random Forest of AA.rmd
+## Title: Intial Scouting-Random Forest of AA USING Tesst-Harness
 
-#### Summary: 
+### Summary: Using the 'caret' package from Max Kuhn and the Test-Harness file I will run random forest to classify the 7 protein groups.
 
-Libraries:
+#### Libraries:
 ```{r libraries, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -24,13 +24,13 @@ for(p in Libraries){
 ```
 
 
-#### A. Import Data:
+#### Import Data:
 ```{r}
-complete_aa <- read_csv("complete_aa.csv")
+test_harness <- read_csv("test_harness_paa.csv")
 ```
 
 
-#### B. Convert 'Class' To Factor
+#### Convert 'Class' To Factor
 Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
 ```{r factor}
 prot_class <- as.factor(complete_aa$Class)
@@ -40,7 +40,7 @@ class(prot_class)
 ```
 
 
-#### C. Partition Testing and Training datasets
+#### Partition Testing and Training datasets
 ```{r}
 set.seed(1000)
 
@@ -50,18 +50,16 @@ testing_set  <- complete_aa[-index,]
 ```
 
 
-#### D. RF model
+#### RF model
 ```{r}
-registerDoMC(cores=3)
-
 start_time <- Sys.time() # Start timer
 
+registerDoMC(cores=3)
 modFit <- train(training_set$Class ~ ., data = training_set, method = "rf")
 
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
-
 
 
 Machine Settings:

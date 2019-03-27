@@ -1,0 +1,3 @@
+* complete_aa.csv: Thisfile represents all the proteins from the 7 classes.
+* Random_Forest_of_AA.rmd: R script for producing random forest algo
+* test_harness_paa.csv: USE THIS FOR INITIAL RF TESTING.
