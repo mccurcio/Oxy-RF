@@ -33,10 +33,10 @@ test_harness <- read_csv("test_harness_paa.csv")
 #### Convert 'Class' To Factor
 Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
 ```{r factor}
-prot_class <- as.factor(complete_aa$Class)
+test_harness <- as.factor(test_harness$Class)
 
-typeof(prot_class)
-class(prot_class)
+typeof(test_harness)
+class(test_harness)
 ```
 
 
@@ -44,9 +44,9 @@ class(prot_class)
 ```{r}
 set.seed(1000)
 
-index <- createDataPartition(complete_aa$Class, p = 0.8, list = FALSE)
-training_set <- complete_aa[ index,]
-testing_set  <- complete_aa[-index,]
+index <- createDataPartition(test_harness$Class, p = 0.8, list = FALSE)
+training_set <- test_harness[ index,]
+testing_set  <- test_harness[-index,]
 ```
 
 
