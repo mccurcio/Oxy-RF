@@ -1,11 +1,11 @@
 ---
-title: "Intial Scouting-Random Forest of AA USING Tesst-Harness.rmd"
+title: "Intial Scouting-Random Forest of AA USING Test-Harness.rmd"
 author: "Matthew Curcio"
 date: "March 20, 2019"
 output: html_document
 ---
 
-## Title: Intial Scouting-Random Forest of AA USING Tesst-Harness
+## Title: Intial Scouting-Random Forest of AA Using Test-Harness
 
 ### Summary: Using the 'caret' package from Max Kuhn and the Test-Harness file I will run random forest to classify the 7 protein groups.
 
@@ -25,48 +25,67 @@ for(p in Libraries){
 
 
 #### Import Data:
-```{r}
-test_harness <- read_csv("test_harness_paa.csv")
+```{r import}
+test_harness_paa <- read_csv("test_harness_paa.csv")
 ```
 
 
-#### Convert 'Class' To Factor
+#### Convert 'Class' To Factor:
 Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
 ```{r factor}
-test_harness <- as.factor(test_harness$Class)
+class_factor <- as.factor(test_harness_paa$Class)
 
-typeof(test_harness)
-class(test_harness)
+typeof(test_harness_paa)
+class(class_factor)
 ```
 
 
-#### Partition Testing and Training datasets
-```{r}
+#### Pre-processing: 
+```{r preproc}
+test_harness_paa <- test_harness_paa[,-c(2:3)] # More later
+```
+
+
+#### Partition Testing and Training datasets:
+```{r partition}
 set.seed(1000)
 
-index <- createDataPartition(test_harness$Class, p = 0.8, list = FALSE)
-training_set <- test_harness[ index,]
-testing_set  <- test_harness[-index,]
+index <- createDataPartition(test_harness_paa$Class, p = 0.8, list = FALSE)
+training_set <- test_harness_paa[ index,]
+testing_set  <- test_harness_paa[-index,]
 ```
 
 
-#### RF model
-```{r}
+#### RF model training
+```{r train}
 start_time <- Sys.time() # Start timer
 
 registerDoMC(cores=3)
-modFit <- train(training_set$Class ~ ., data = training_set, method = "rf")
+modFit <- train(Class ~ ., 
+                data = training_set,
+                method = "rf")
 
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
 
 
-Machine Settings:
+#### Model fitting output:
 ```{r}
+modFit
+```
+
+#### Testing 'mtry' with 1:5
+```{r}
+
+```
+
+
+Machine Settings:
+```{r settings}
 Sys.info()[c(1:3,5)]
 ```
-```{r}
+```{r session}
 sessionInfo()
 ```
 EOF
