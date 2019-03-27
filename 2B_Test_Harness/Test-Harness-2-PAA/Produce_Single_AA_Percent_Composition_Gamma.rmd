@@ -36,9 +36,12 @@ import_polypeptide_line <- function(FILE_2_RUN) {
                                nlines = 1, 
                                quiet = T, 
                                text)
-        linear_pp_to_percent_aa(line_2_process) # Process polypeptides to paa.
+        #print(line_2_process)
+        linear_pp_to_percent_aa(line_2_process, n) # Process polypeptides to paa.
     }
 }
+
+#import_polypeptide_line(file) ## It Works
 ```
 
 #### Initialize file
@@ -58,40 +61,50 @@ initialize_file <- function() {
                eol = "\n")
 }
 
-initialize_file()
+#initialize_file()
 ```
 
 #### Produce % AA Composition from linear polypeptides
 ```{r}
-linear_pp_to_percent_aa <- function(line_2_process) {
-    # Initialize column naming conventions
+linear_pp_to_percent_aa <- function(line_2_process, n) {
     aa_vector = as.vector(matrix(0, ncol = 23))
     code_key <- c("Ctrl", "Ery", "Hcy", "Hgb", "Hhe", "Lgb", "Mgb")
-    amino_acids = t(c("G", "P", "A", "V", "L", "I", "M", "C", "F", "Y",
-                      "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T"))
-    # Loop over 7 Code-Keys to apply "Class" and "id"
-    for (i in code_key) {
-        # For this test-harness file each 500 lines in a 'Class'
-        for (j in 1:500) {
-            # First column is protein 'Class'
-            aa_vector[1] = i
-            # Second column is 'id'
-            aa_vector[2] = paste(code_key, j, sep = "-")
-            # Third column is 'TotalAA'
-            total_aa = nchar(line_2_process,
-                             type = "chars",
-                             keepNA = FALSE)
-            aa_vector[3] = total_aa
-            # Columns 4:23 - Calculate percent AA per line
-            for (k in 4:23) {
-                aa_vector[k] = str_count(line_2_process[1, row], k-4) / total_aa
-            }
-            aa_nums = t(aa_nums)
+    amino_acids = c("G", "P", "A", "V", "L", "I", "M", "C", "F", "Y",
+                    "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T")
+    # First column is protein 'Class'
+    if (n < 501) {
+        (aa_vector[1] <- "Ctrl")
+    } else if (n < 1001) {
+        (aa_vector[1] <- "Ery")
+    } else if (n < 1501) {
+        (aa_vector[1] <- "Hcy")
+    } else if (n < 2001) {
+        (aa_vector[1] <- "Hgb")
+    } else if (n < 2501) {
+        (aa_vector[1] <- "Hhe")
+    } else if (n < 3001) {
+        (aa_vector[1] <- "Lgb")
+    } else {
+        (aa_vector[1] <- "Mgb")
+    }
+    # Second column is 'id'
+    aa_vector[2] = paste("P", n, sep = "")
+    # Third column is 'TotalAA'
+    total_aa = nchar(line_2_process, keepNA = FALSE)
+    aa_vector[3] = total_aa
+    # Columns 4:23 - Calculate % AA per line
+    for (k in 1:20) {
+        aa_vector[k] = str_count(line_2_process, pattern = amino_acids[k]) / total_aa
+    }
+    line_2_write <- cbi
+    write(x = aa_vector,
+          file = "test_harness_paa.csv", 
+          append = TRUE, 
+          ncolumns = 23, 
+          sep = ",")
         }
-        }
-}
 ```
-
+test_harness_paa.csv
 
 ### MAIN
 ```{r}
