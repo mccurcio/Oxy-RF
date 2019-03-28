@@ -7,13 +7,14 @@ output: html_document
 
 ## Title: Tuning_RF_with_mtry.rmd
 
-#### Summary: https://rpubs.com/chidungkt/381554
+#### Summary: Parameter Tuning (ntree + mtry) for Random Forest when Using caret Package
 
-Libraries:
-```{r libraries, message=FALSE}
+#### Library 1/2:
+```{r library1, message=FALSE}
+cache = TRUE
 knitr::opts_chunk$set(echo = TRUE)
 
-Libraries = c("readr", "doMC", "tidyverse", "magrittr", "caret")
+Libraries = c("readr", "doMC",  "caret", "randomForest")
 
 # Install if not present
 for(p in Libraries){
@@ -23,56 +24,138 @@ for(p in Libraries){
 }
 ```
 
-Import Data:
-```{r}
-test_harness_paa <- read_csv("4_RF_Tuning_w_mtry/test_harness_paa.csv",
+#### Import Data:
+```{r import}
+cache = TRUE
+setwd("~/Dropbox/Oxy-RF/4_RF_Tuning_w_mtry")
+test_harness_paa <- read_csv("test_harness_paa.csv",
                              col_types = cols(TotalAA = col_skip(),
                                               id = col_skip()))
 ```
 
+#### Convert 'Class' To Factor:
+Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
+```{r factor}
+cache = TRUE
+class_factor <- as.factor(test_harness_paa$Class)
 
-```{r}
-modelLookup(model = "rf")
+typeof(test_harness_paa)
+class(class_factor)
 ```
 
-```{r}
+#### Partition Testing and Training datasets:
+```{r partition}
+cache = TRUE
 set.seed(1000)
-train.control <- trainControl(method = "repeatedcv", 
+
+index <- createDataPartition(test_harness_paa$Class, p = 0.8, list = FALSE)
+training_set <- test_harness_paa[ index,]
+testing_set  <- test_harness_paa[-index,]
+
+preProcValues <- preProcess(training_set, method = c("center", "scale"))
+
+train_transformed <- predict(preProcValues, training_set)
+test_transformed  <- predict(preProcValues, testing_set)
+```
+
+#### Train control for Cross-validation with 5 reps:
+```{r control}
+cache = TRUE
+set.seed(1000)
+train_control <- trainControl(method = "repeatedcv", 
                               number = 10,
-                              repeats = 3, 
-                              classProbs = TRUE,
-                              allowParallel = TRUE, 
+                              repeats = 5,
+                              verboseIter = TRUE,
+                              allowParallel = TRUE,
                               summaryFunction = multiClassSummary)
 ```
 
-
-```{r}
+#### 'mtry' grid tuning:
+```{r train}
+cache = TRUE
+set.seed(1000)
 registerDoMC(cores = 3)
 
-mtry <- (train_df %>% ncol() - 1) %>% sqrt() %>% floor()
-
-my_grid1 <- expand.grid(mtry = mtry)
-
-set.seed(1)
-rf1 <- train(BAD ~., 
-             data = train_df, 
-             method = "rf", 
-             metric = "Accuracy", 
-             tuneGrid = my_grid1, 
-             trControl = train.control)
-
-rf1
-
-```
-
-
-
-```{r}
 start_time <- Sys.time() # Start timer
+
+my_grid1 <- expand.grid(mtry = 1:4)
+
+rf1 <- train(Class ~ .,
+             data = train_transformed,
+             method = "rf",
+             metric = "Accuracy",
+             tuneGrid = my_grid1,
+             trControl = train_control)
 
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
+
+#### View Results:
+```{r view}
+rf1
+```
+
+#### Library 2/2:
+```{r library2, message=FALSE, warning=FALSE, include=FALSE, message=FALSE}
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+```
+
+#### Plotting:
+```{r plot}
+cache = TRUE
+
+my_plot <- function(model) {
+    theme_set(theme_minimal())
+    u <- model$results %>%
+        select(mtry, Accuracy, Kappa, Mean_F1, Mean_Sensitivity,
+               Mean_Specificity,Mean_Pos_Pred_Value, Mean_Neg_Pred_Value, 
+               Mean_Precision, Mean_Recall, Mean_Detection_Rate) %>%
+        gather(a, b, -mtry)
+    
+    u %>% ggplot(aes(mtry, b)) + geom_line() + geom_point() + 
+        facet_wrap(~ a, scales = "free") + 
+        labs(x = "Number of mtry", y = NULL, 
+             title = "The Relationship between Model Performance and mtry")
+}
+
+rf1 %>% my_plot()
+```
+
+#### Tuning of trees paramter:
+```{r}
+cache = TRUE
+set.seed(1000)
+registerDoMC(cores = 3)
+train_control <- trainControl(method = "repeatedcv", 
+                              number = 10,
+                              repeats = 5,
+                              verboseIter = TRUE,
+                              allowParallel = TRUE,
+                              summaryFunction = multiClassSummary)
+
+start_time <- Sys.time() # Start timer 
+
+##  RUN: rf_trees
+for (i in seq(50, 500, by = 50)) {
+    rf_trees <- train(Class ~.,
+                 data = train_transformed,
+                 method = "rf",
+                 metric = "Accuracy",
+                 mtry = 2,
+                 ntree = i,
+                 trControl = train_control)
+    
+    key <- toString(i)
+    model_list[[key]] <- rf_trees  # Store models based on varying trees
+}
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
 
 
 
