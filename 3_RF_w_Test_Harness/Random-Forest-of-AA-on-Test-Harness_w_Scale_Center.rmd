@@ -1,13 +1,15 @@
 ---
-title: "Intial Scouting-Random Forest of AA USING Test-Harness.rmd"
+title: "Random-Forest-of-AA-on-Test-Harness_w_Scale_Center.rmd"
 author: "Matthew Curcio"
 date: "March 20, 2019"
 output: html_document
 ---
 
-## Title: Intial Scouting-Random Forest of AA Using Test-Harness
+## Title: Random-Forest-of-AA-on-Test-Harness_w_Scale_Center
 
-### Summary: Using the 'caret' package from Max Kuhn and the Test-Harness file I will run random forest to classify the 7 protein groups.
+### Summary: Using the 'caret' package from Max Kuhn and the Test-Harness file I will run random forest to classify the 7 protein groups. 
+
+This script has **preProcess = c("center","scale")**.
 
 #### Libraries:
 ```{r libraries, message=FALSE}
@@ -24,12 +26,10 @@ for(p in Libraries){
 }
 ```
 
-
 #### Import Data:
 ```{r import}
 test_harness_paa <- read_csv("test_harness_paa.csv")
 ```
-
 
 #### Convert 'Class' To Factor:
 Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
@@ -40,12 +40,10 @@ typeof(test_harness_paa)
 class(class_factor)
 ```
 
-
-#### Pre-processing: 
-```{r preproc}
-test_harness_paa <- test_harness_paa[,-c(2:3)] # More later
+#### Data Cleaning: 
+```{r clean}
+test_harness_paa <- test_harness_paa[,-c(2:3)]
 ```
-
 
 #### Partition Testing and Training datasets:
 ```{r partition}
@@ -57,61 +55,41 @@ training_set <- test_harness_paa[ index,]
 testing_set  <- test_harness_paa[-index,]
 ```
 
-
-#### RF model 1 training
-```{r train1}
+#### Implement Pre-Processing to compare training
+```{r train}
 cache = TRUE
+registerDoMC(cores=3)
+
 start_time <- Sys.time() # Start timer
 
-registerDoMC(cores=3)
-modFit <- train(Class ~ ., 
-                data = training_set,
-                method = "rf")
+# Setting the parameters for model preprocessing and tuning from the caret package: 
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,           # 10-fold Crossvalidation
+                           repeats = 5,           # repeated ten times
+                           verboseIter=FALSE,
+                           preProcOptions="pca",  # PCA Preprocessing
+                           allowParallel=TRUE)    # With parallel backend
+
+RF_model <- train(Class ~ ., 
+                  data = training_set, 
+                  method = "rf", 
+                  preProcess = c("center","scale"), 
+                  trControl= fitControl)
 
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
 
-
-#### Model 1 fitting output:
-```{r fit1}
+#### Model output:
+```{r res}
 cache = TRUE
-modFit
+RF_model
 ```
 
-#### Find confusion matrix for Model 1:
+#### View confusion matrix for model:
 ```{r cm}
 cache = TRUE
-modFit$finalModel
-```
-
-#### Implement Pre-Processing to compare training
-```{r train2}
-cache = TRUE
-start_time <- Sys.time() # Start timer
-
-registerDoMC(cores=3)
-modFit2 <- train(Class ~ ., 
-                 data = training_set,
-                 method = "rf",
-                 preProcess = c("center","scale")
-                 )
-
-end_time <- Sys.time()   # End timer
-end_time - start_time    # Display time
-```
-
-
-#### Model 2 fitting output:
-```{r fit2}
-cache = TRUE
-modFit2
-```
-
-#### Find confusion matrix for Model 2:
-```{r}
-cache = TRUE
-modFit2$finalModel
+RF_model$finalModel
 ```
 
 #### Predict using the testing_set dataset
@@ -120,22 +98,15 @@ cache = TRUE
 
 #testing = as.factor(testing_set$Class)
 
-predictRF <- predict(modFit2, testing)
+#predictRF <- predict(modFit2, testing)
 
-confusionMatrix(predictRF, testing)
+#confusionMatrix(predictRF, testing)
 #confusionMatrixRF
 
 #levels(predictRF)
+
+#levels(testing_set)
 ```
-
-```{r}
-levels(testing_set)
-```
-
-```{r}
-
-```
-
 
 
 

@@ -1,0 +1,86 @@
+---
+title: "Tuning RF with 'mtry'"
+author: "Matthew Curcio"
+date: "March 27, 2019"
+output: html_document
+---
+
+## Title: Tuning_RF_with_mtry.rmd
+
+#### Summary: https://rpubs.com/chidungkt/381554
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC", "tidyverse", "magrittr", "caret")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data:
+```{r}
+test_harness_paa <- read_csv("4_RF_Tuning_w_mtry/test_harness_paa.csv",
+                             col_types = cols(TotalAA = col_skip(),
+                                              id = col_skip()))
+```
+
+
+```{r}
+modelLookup(model = "rf")
+```
+
+```{r}
+set.seed(1000)
+train.control <- trainControl(method = "repeatedcv", 
+                              number = 10,
+                              repeats = 3, 
+                              classProbs = TRUE,
+                              allowParallel = TRUE, 
+                              summaryFunction = multiClassSummary)
+```
+
+
+```{r}
+registerDoMC(cores = 3)
+
+mtry <- (train_df %>% ncol() - 1) %>% sqrt() %>% floor()
+
+my_grid1 <- expand.grid(mtry = mtry)
+
+set.seed(1)
+rf1 <- train(BAD ~., 
+             data = train_df, 
+             method = "rf", 
+             metric = "Accuracy", 
+             tuneGrid = my_grid1, 
+             trControl = train.control)
+
+rf1
+
+```
+
+
+
+```{r}
+start_time <- Sys.time() # Start timer
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF
