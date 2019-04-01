@@ -1,0 +1,115 @@
+---
+title: "Tuning RF Using ntree"
+author: "Matthew Curcio"
+date: "March 27, 2019"
+output: html_document
+---
+
+## Title: Tuning_RF_Using_ntree.rmd
+
+#### Summary: Parameter Tuning (ntree) for Random Forest when Using caret Package
+
+#### Library 1/2:
+```{r library1, message=FALSE}
+cache = TRUE
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC",  "caret", "randomForest", "ggplot2")
+
+# Install if not present
+for(p in Libraries){
+    if (!require(p, character.only = TRUE)) { install.packages(p) }
+    library(p, character.only = TRUE)
+}
+```
+
+#### Import Data:
+```{r import}
+cache = TRUE
+setwd("~/Dropbox/Oxy-RF/5_RF_Tuning_w_ntree")
+test_harness_paa <- read_csv("test_harness_paa.csv",
+                             col_types = cols(TotalAA = col_skip(),
+                                              id = col_skip()))
+```
+
+#### Convert 'Class' To Factor:
+Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
+```{r factor}
+cache = TRUE
+class_factor <- as.factor(test_harness_paa$Class)
+
+typeof(test_harness_paa)
+class(class_factor)
+```
+
+#### Partition Testing and Training datasets:
+```{r partition}
+cache = TRUE
+set.seed(1000)
+
+index <- createDataPartition(test_harness_paa$Class, p = 0.8, list = FALSE)
+training_set <- test_harness_paa[ index,]
+testing_set  <- test_harness_paa[-index,]
+
+preProcValues <- preProcess(training_set, method = c("center", "scale"))
+
+train_transformed <- predict(preProcValues, training_set)
+```
+
+#### Optimize mtry and ntree
+```{r}
+cache = TRUE
+set.seed(1000)
+registerDoMC(cores = 3)
+
+start_time <- Sys.time() # Start timer
+
+for (i in c(50,100,150, 200, 250, 300, 350, 400, 500, 1000)){ # number of trees
+    for (j in c(1, 2, 3)){ # number of predictors to sample
+        rf_mtry_ntree_test = randomForest(Class ~ ., 
+                                      data = Class,  
+                                      mtry = j, 
+                                      ntree = i)
+        # Get OOB error rate for training data
+        yhat = rf_mtry_ntree_test$predicted
+        y = rf_mtry_ntree_test$Class
+        error_rate <- mean(y != yhat)
+    
+        if (exists('oob_err') == FALSE){
+            oob_err = c(i,j,error_rate) 
+            # create initial data frame
+        }
+        else{
+            oob_err = rbind(oob_err, c(i, j, error_rate)) 
+            # append to data frame of error rates, ntree, and mtry
+        }
+      }
+}
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+#### Error Compilation
+```{r}
+oob_err <- as.data.frame(oob_err) # convert to data frame
+names(oob_err) <- c('ntree', 'mtry', 'oob_error_rate') # add column names
+oob_err$mtry <- as.factor(oob_err$mtry) # mtry to factor
+```
+
+#### Plot
+```{r}
+ggplot(oob_err, aes(x=ntree, y = oob_error_rate, group=mtry)) +
+    geom_line(aes(color=mtry))
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

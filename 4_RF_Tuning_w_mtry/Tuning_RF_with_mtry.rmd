@@ -7,7 +7,7 @@ output: html_document
 
 ## Title: Tuning_RF_with_mtry.rmd
 
-#### Summary: Parameter Tuning (ntree + mtry) for Random Forest when Using caret Package
+#### Summary: Parameter Tuning (mtry) for Random Forest when Using caret Package
 
 #### Library 1/2:
 ```{r library1, message=FALSE}
@@ -58,8 +58,8 @@ train_transformed <- predict(preProcValues, training_set)
 test_transformed  <- predict(preProcValues, testing_set)
 ```
 
-#### Train control for Cross-validation with 5 reps:
-```{r control}
+#### Train control for 10 X Cross-validation with 5 reps:
+```{r control1}
 cache = TRUE
 set.seed(1000)
 train_control <- trainControl(method = "repeatedcv", 
@@ -71,7 +71,7 @@ train_control <- trainControl(method = "repeatedcv",
 ```
 
 #### 'mtry' grid tuning:
-```{r train}
+```{r train2}
 cache = TRUE
 set.seed(1000)
 registerDoMC(cores = 3)
@@ -123,40 +123,6 @@ my_plot <- function(model) {
 
 rf1 %>% my_plot()
 ```
-
-#### Tuning of trees paramter:
-```{r}
-cache = TRUE
-set.seed(1000)
-registerDoMC(cores = 3)
-train_control <- trainControl(method = "repeatedcv", 
-                              number = 10,
-                              repeats = 5,
-                              verboseIter = TRUE,
-                              allowParallel = TRUE,
-                              summaryFunction = multiClassSummary)
-
-start_time <- Sys.time() # Start timer 
-
-##  RUN: rf_trees
-for (i in seq(50, 500, by = 50)) {
-    rf_trees <- train(Class ~.,
-                 data = train_transformed,
-                 method = "rf",
-                 metric = "Accuracy",
-                 mtry = 2,
-                 ntree = i,
-                 trControl = train_control)
-    
-    key <- toString(i)
-    model_list[[key]] <- rf_trees  # Store models based on varying trees
-}
-
-end_time <- Sys.time()   # End timer
-end_time - start_time    # Display time
-```
-
-
 
 
 Machine Settings:
