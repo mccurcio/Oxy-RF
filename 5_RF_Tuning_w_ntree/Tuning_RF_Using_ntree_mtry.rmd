@@ -1,18 +1,22 @@
 ---
-title: "Tuning RF Using ntree"
+title: "Tuning_RF_Using_ntree.rmd"
 author: "Matthew Curcio"
+email: "mockrun@gmail.com"
 date: "March 27, 2019"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
+    toc_float: true
+    collapsed: FALSE
 ---
 
-## Title: Tuning_RF_Using_ntree.rmd
+## Title: Tuning RF Using ntree
 
 #### Summary: Parameter Tuning (ntree) for Random Forest when Using caret Package
 
-#### Library 1/2:
-```{r library1, message=FALSE}
-cache = TRUE
-knitr::opts_chunk$set(echo = TRUE)
+#### Library:
+```{r library, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
 Libraries = c("readr", "doMC",  "caret", "randomForest", "ggplot2")
 
@@ -25,7 +29,6 @@ for(p in Libraries){
 
 #### Import Data:
 ```{r import}
-cache = TRUE
 setwd("~/Dropbox/Oxy-RF/5_RF_Tuning_w_ntree")
 test_harness_paa <- read_csv("test_harness_paa.csv",
                              col_types = cols(TotalAA = col_skip(),
@@ -35,16 +38,14 @@ test_harness_paa <- read_csv("test_harness_paa.csv",
 #### Convert 'Class' To Factor:
 Convert Class(numerical) to Factor of 7 Protein Classes(Prot_Class)
 ```{r factor}
-cache = TRUE
-class_factor <- as.factor(test_harness_paa$Class)
+Class <- as.factor(test_harness_paa$Class)
 
 typeof(test_harness_paa)
-class(class_factor)
+class(Class)
 ```
 
 #### Partition Testing and Training datasets:
 ```{r partition}
-cache = TRUE
 set.seed(1000)
 
 index <- createDataPartition(test_harness_paa$Class, p = 0.8, list = FALSE)
@@ -53,56 +54,63 @@ testing_set  <- test_harness_paa[-index,]
 
 preProcValues <- preProcess(training_set, method = c("center", "scale"))
 
-train_transformed <- predict(preProcValues, training_set)
+training_set <- predict(preProcValues, training_set)
 ```
 
-#### Optimize mtry and ntree
-```{r}
-cache = TRUE
+
+#### A. RF 'mtry=1,2,3,4' tuning:
+```{r train}
 set.seed(1000)
 registerDoMC(cores = 3)
 
 start_time <- Sys.time() # Start timer
 
-for (i in c(50, 100, 150, 200, 250, 300, 350, 400, 500, 1000)){ # number of trees
-    for (j in c(1, 2, 3)){ # number of predictors to sample
-        rf_mtry_ntree_test = randomForest(Class ~ ., 
-                                          data = train_transformed, 
-                                          ntree = i,
-                                          mtry = j)
-        # Get OOB error rate for training data
-        yhat = rf_mtry_ntree_test$predicted
-        y = rf_mtry_ntree_test$Class
-        error_rate <- mean(y != yhat)
-    
-        if (exists('oob_err') == FALSE){
-            oob_err = c(i, j, error_rate) 
-            # create initial data frame
-        }
-        else{
-            oob_err = rbind(oob_err, c(i, j, error_rate)) 
-            # append to data frame of error rates, ntree, and mtry
-        }
-      }
-}
+# How many columns to select in each bootstrap sample?
+t_grid <- expand.grid(mtry= c(1, 2, 3, 4))
 
-randomForest.formula(
+model.rf <- train(Class ~ .,
+                  data = training_set,
+                  method = "rf",
+                  ntree = 100, # How many trees to grow in total?
+                  tuneGrid = t_grid)
 
 end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
 
-#### Error Compilation
+#### B. RF 'mtry=1,2,3,4' Tuning Results:
 ```{r}
-oob_err <- as.data.frame(oob_err) # convert to data frame
-names(oob_err) <- c('ntree', 'mtry', 'oob_error_rate') # add column names
-oob_err$mtry <- as.factor(oob_err$mtry) # mtry to factor
+print(model.rf)
 ```
 
-#### Plot
+#### C. RF  ntree = 500 tuning:
 ```{r}
-ggplot(oob_err, aes(x=ntree, y = oob_error_rate, group=mtry)) +
-       geom_line(aes(color=mtry))
+set.seed(1000)
+registerDoMC(cores = 3)
+
+start_time <- Sys.time() # Start timer
+
+model.rf <- train(Class ~ .,
+                  data = training_set,
+                  method = "rf",
+                  ntree = 500)
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+#### D. Run Correlation Analysis to investigate for multicollinearity:
+```{r}
+# 
+trainingCor <- findCorrelation(cor(training_set[,-1]), cutoff = 0.60)
+
+trainingCor
+```
+
+
+```{r}
+rf <- randomForest(Class ~ ., data = training_set, ntree = 100, mtry = 2)
+rf
 ```
 
 
