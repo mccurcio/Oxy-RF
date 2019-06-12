@@ -1,0 +1,78 @@
+---
+title: "050-ml-knn-caret-perc-aa-data.rmd"
+author: "Matthew Curcio"
+date: "February 20, 2019"
+output: html_document
+---
+
+## Title: C5.0 Trees
+
+#### Summary: 
+
+- Get the data
+- Data Pre-processing
+- Build a model
+- Predictions
+- Communication
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "caret", "doMC", "ggplot2", "lattice")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data:
+```{r, message=FALSE}
+X5_class_aa <- read_csv("2-pipeline/5_class_aa.csv")
+```
+
+Simple Preparation:
+```{r}
+five_paa = X5_class_aa[,-2]  # Remove TotalAA
+```
+
+
+- Spliting data as training and test set. 
+- Using createDataPartition() function from caret
+
+createDataPartition:
+```{r}
+set.seed(1000)
+
+train_rows <- createDataPartition(y = five_paa$Class, 
+                                  p = 0.75, 
+                                  list = FALSE)
+train_data <- five_paa[ train_rows,]
+test_data  <- five_paa[-train_rows,]
+
+#Checking distibution in origanl data and partitioned data
+prop.table(table(train_data$Class)) * 100
+```
+
+
+Build a Decision Tree
+Model the tree
+
+Use Quinlan’s C5.0 decision tree algorithm implementation from the C50 package to build your decision tree
+
+
+
+
+
+
+
+```{r}
+sessionInfo()
+```
+
+```{r}
+
+```

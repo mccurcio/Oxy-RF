@@ -1,0 +1,202 @@
+---
+title: "031-EDA-part-ABC.rmd"
+author: "Matthew Curcio"
+date: "February 19, 2019"
+output: html_document
+---
+
+
+## Title: 031-EDA-part-ABC.rmd
+
+Summary: This script is the first of the exploratory data analysis for the oxygen binding proteins. Parts include:
+- A. importing
+- B. data types-str / inheritance / factors
+  - I needed `tail -n +2 pro_class_Ctrl_aa.csv > ctrl_paa.csv` to delete first line of all .csv files, then use cat to splice them together leaving only ONE header notsix.
+- C. head() / tail() commands
+- D. Missing data exploration / Dealing w NA’s
+
+#### Outline: 
+
+```{r libraries}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c('readr')
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+### A - Import Data Using "readr" package
+```{r}
+all_paa <- read_csv("2-pipeline/Feb2019_protein_classes/all_paa.csv")
+```
+
+
+### B - Data Types / inheritance / factors
+```{r}
+str(all_paa)
+```
+
+
+While importing the 28 MB dataset the 'Class' variable was properly imported as a character set. However we want to change this to a factor such that wwe can take advantage of R's classification abilities later on.
+
+Make Column #1 factors
+```{r}
+factor_proteins = factor(all_paa$Class)
+```
+
+Now Check all levels
+```{r}
+levels(factor(all_paa$Class))  
+```
+
+```{r}
+unique(all_paa$Class)
+```
+
+
+```{r}
+table(all_paa$Class)
+```
+
+# PROBLEM??? with 6 Class names coming up????
+
+
+### C. head() / tail() commands
+```{r}
+head (all_paa)
+```
+
+```{r}
+tail (all_paa)
+```
+
+Let's look at the some specific lines
+```{r}
+all_paa[c(1215,1216,1217,1218,1219), ]
+```
+
+
+### D. Missing data exploration / Dealing w NA’s
+
+Checking for missing data can be done in several ways. 
+
+This gives us an indication that all columns are complete. In this case, command `is.na()` is a data type and in each column (e.g. 2) any are not `NA`.
+
+We see there NO missing values NOW. So I will introduce some.
+
+```{r}
+apply(all_paa, 2, function(x) any(is.na(x)))
+```
+
+The `FALSE` indicates that there are no `NA`'s which appear in the dataset. 
+
+--- 
+
+#### Since our dataframe Does Not contain `NA` I will add some. 
+
+When missing data is present. Generally there are several alternatives.
+
+1. You can choose not use the column(feature) or row(observation) or that particular value in your computations.
+2. Replace the missing values with the column average which is very commonly done.
+3. Use a tool for data imputation, such as `mice`
+
+I will demonsrate replacing the missing data with the column average.
+
+```{r}
+head(all_paa$TotalAA, 20)
+```
+
+Since our dataframe does not contain `NA` I will add some. 
+
+I will arbitrarily introduce `NA` at values less than 500.
+
+```{r}
+all_paa$TotalAA[all_paa$TotalAA < 500] <- NA
+head(all_paa$TotalAA, 20)
+```
+
+
+
+```{r}
+head(is.na(all_paa$TotalAA), 20)
+```
+
+A useful function for finding `NA` values in the `any` and `all` functions.
+
+```{r}
+any(is.na(all_paa$TotalAA))  # Are ANY values `NA`
+```
+
+```{r}
+all(is.na(all_paa$TotalAA))  # Are ALL values `NA`? Obviously not.
+```
+
+But where are the actual `NA` values in my column `all_paa$TotalAA`? 
+```{r}
+head(which(is.na(all_paa$TotalAA), arr.ind = TRUE))
+```
+
+The vector produced by `which` provides us with the position numbers for the `NA`s.
+
+```{r}
+mean_df = mean(all_paa$TotalAA, na.rm = TRUE)
+mean_df
+```
+
+```{r}
+NA2mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+all_paa[] <- lapply(all_paa, NA2mean)
+
+head(all_paa$TotalAA, 20)
+```
+
+Do we see that positions (1, 2, 6, 8, 9, 10) are replaced by the mean?
+mean
+
+
+**END OF SECTION Explortory Data Analysis A-D
+
+
+
+##### Machine Settings
+
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+
+```{r}
+sessionInfo()
+```
+
+EOF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+sessioninfo()
+```
+
+```{r}
+Uname????
+```

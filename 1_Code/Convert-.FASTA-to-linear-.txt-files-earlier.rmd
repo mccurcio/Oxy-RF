@@ -1,0 +1,79 @@
+---
+title: "Convert-.FASTA-to-linear-.txt-files.rmd"
+author: "Matthew Curcio"
+date: "March 4, 2019"
+output: html_document
+---
+
+## Title: Convert-.FASTA-to-linear-.txt-files.rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "seqinr", "stringr", "dplyr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+#### Read FASTA files, ONLY in .fasta, and produces Proteins in linear form in .txt files.
+
+Convert 'fasta_2_sequences':
+```{r fasta_2_sequences}
+fasta_2_sequences <- function(){
+    FASTA_DIR = "~/Dropbox/OxyRF/0_Data/FASTA-data"
+    setwd(FASTA_DIR)
+    protein_class = c("Ery", "Hhe", "Hcy", "Hgb", "Ctrl", "Lgb", "Mgb")
+    prot_list = list.files(pattern = ".fasta$")
+    print(prot_list)
+    print(length(prot_list))
+    
+    # for loop to read sequences using seqinr:read.fasta
+    for (i in seq(length(prot_list))) {
+        prot_seq <- read.fasta(file = prot_list[i],
+                               seqtype = "AA",
+                               seqonly = TRUE,
+                               as.string = TRUE)
+        file_name <- paste("protein_class_",
+                           protein_class[i],
+                           ".txt",
+                           sep = "")
+        write.table(x = prot_seq,
+                    file = file_name,
+                    sep = "\n",
+                    col.names = FALSE,
+                    row.names = FALSE)
+    }
+}
+```
+
+
+
+Run fasta_2_sequences:
+```{r}
+start_time <- Sys.time() # Start timer
+
+# Run function
+fasta_2_sequences()
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

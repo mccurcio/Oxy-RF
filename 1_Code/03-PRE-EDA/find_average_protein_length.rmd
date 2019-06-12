@@ -1,0 +1,65 @@
+---
+title: "find_average_protein_length.rmd"
+author: "Matthew Curcio"
+date: "February 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## find_average_protein_length.rmd
+
+
+```{r libraries}
+Libraries = c('readr')
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+```{r}
+setwd("~/Desktop/ml-o2-binding-proteins/2-pipeline/Feb2019_protein_classes")
+
+find_average_protein_length <- function(){
+    prot_list = list.files(pattern = ".txt$")
+    for (i in length(prot_list)) {
+        print(prot_list)
+        print(length(readLines(prot_list[i])))
+        file_len = length(readLines(prot_list[i]))
+    }
+
+}
+
+find_average_protein_length()
+```
+
+
+
+
+
+## File
+file <- "myfile.txt"
+ 
+## Create connection
+con <- file(description=file, open="r")
+ 
+## Hopefully you know the number of lines from some other source or
+com <- paste("wc -l ", file, " | awk '{ print $1 }'", sep="")
+n <- system(command=com, intern=TRUE)
+ 
+## Loop over a file connection
+for(i in 1:n) {
+  tmp <- scan(file=con, nlines=1, quiet=TRUE)
+  ## do something on a line of data 
+}
+
+
+
+

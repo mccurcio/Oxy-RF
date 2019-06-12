@@ -1,0 +1,107 @@
+---
+title: "032-EDA-part-EF.rmd"
+author: "Matthew Curcio"
+date: "February 19, 2019"
+output: html_document
+---
+
+## Title: 032-EDA-part-EF.rmd
+
+#### Summary: 
+
+- E-Summary, Subsetting, Using *psych* package: `describeBy`
+- F-1D Plots: Box plots / Violin plots
+
+Libraries
+```{r libraries, echo=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "psych", "ggplot2")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data
+```{r, message=FALSE}
+all_paa <- read_csv("/home/mcc/Desktop/ml-o2-binding-proteins/2-pipeline/Feb2019_protein_classes/all_paa.csv")
+Classes = factor(all_paa$Class)
+```
+
+### Descriptive Statistics
+
+One can call any section or all of the features that are available.
+
+For all: `summary(all_paa)` 
+
+This command is overkill since it would produce 22 sets of information, one for every column.
+
+**Remember:** It is possible to 'slice and dice' the data. For example, Data or dataframes (as they are refered to in R) are labeled:
+
+    dataframe[row, columns]
+
+Therefore below I wanted ony see the first 4 columns.
+```{r}
+summary(all_paa[, c(2,3,10,13)])
+```
+
+A very interesting library is the `psych` package. Not only does it have great datasets from [Sir Francis Galton](https://en.wikipedia.org/wiki/Francis_Galton), `cubits`,  `galton`, `heights` but some nice descriptive statistics as well, such as `describeBy`.
+
+```{r}
+describeBy(all_paa$TotalAA, group = Classes, mat=TRUE)
+```
+
+
+### 1D Plots Box
+
+Box plots of Percent Amino Acid Composition
+
+```{r fig.height=10, fig.width=6}
+boxplot(all_paa[ ,c(3:22)],
+        main = "Boxplot: Percent Composition of 20 AA",
+        xlab = "Amino Acids",
+        ylab = "Percent Composition",
+        horizontal = TRUE,
+        ylim = c(0,0.4))
+```
+
+1D Plots: Box plots of Polypeptide Length (# AA) Vs. Protein Class
+```{r fig.height=4, fig.width=6}
+boxplot(all_paa$TotalAA ~ Classes,
+        main = "Boxplot: Number of AA Vs. Class",
+        xlab = "Class",
+        ylab = "Number of AA",
+        horizontal = FALSE)
+```
+
+```{r fig.height=4, fig.width=6}
+boxplot(all_paa$TotalAA ~ Classes,
+        main = "Boxplot: Number of AA Vs. Class",
+        xlab = "Class",
+        ylab = "Number of AA",
+        horizontal = FALSE,
+        ylim = c(0, 1000))
+```
+
+
+1D Violin Plots
+```{r}
+ggplot(all_paa, aes(x=Classes, y=all_paa$TotalAA)) + geom_violin()
+```
+
+
+##### Machine Settings
+
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+
+```{r}
+sessionInfo()
+```
+
+EOF

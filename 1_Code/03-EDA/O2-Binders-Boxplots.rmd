@@ -1,0 +1,124 @@
+---
+title: "O2-Binders-Boxplots.rmd"
+author: "Matthew Curcio"
+date: "February 4, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# O2-Binders-Boxplots
+
+```{r message=FALSE, include=FALSE}
+setwd("~/Desktop/ml-o2-binding-proteins/2-pipeline/7-percent-aa-composition-numbers")
+library(readr)
+df <- read_csv("complete_aa.csv")
+```
+
+Let's look at the BoxPlot of the 7 different categories of proteins vs total number of amino acids per protein.
+
+```{r fig.height=11}
+boxplot(df$TotalAA ~ df$Class, 
+        horizontal = FALSE, 
+        main = "BoxPlot of 7 categories of proteins Vs total number of amino acids/protein",
+        ylim = c(0,2000))
+```
+
+Let's now zero in on the boxplots of the Oxygen binding proteins alone for some comparisons
+```{r}
+df_oxyen_binders <- subset(df, Class > 0, select=Class:T)
+              
+boxplot(df_oxyen_binders$TotalAA ~ df_oxyen_binders$Class, 
+        horizontal = FALSE, 
+        main = "BoxPlot of O2 binding proteins Vs total number of amino acids/protein",
+        ylim = c(0,1000))
+```
+
+
+```{r}
+boxplot(df_oxyen_binders$TotalAA ~ df_oxyen_binders$Class, 
+        horizontal = FALSE, 
+        main = "BoxPlot of O2 binding proteins Vs total number of amino acids/protein",
+        ylim = c(0,800))
+```
+
+Now, let us investigate the Percent AA compostion of the 6 Oxygen binding proteins
+
+```{r fig.height=11}
+df_aa_6o2 = df_oxyen_binders[,-c(1,2)]
+
+boxplot(df_aa_6o2, 
+        horizontal = TRUE, 
+        main = "Percent AA Composition Oxygen-Binding Proteins")
+```
+
+This set of Boxplots shows that there are several outliers that may skew the overall data. For example, there is a point near P=0.4 for Ala.
+
+It might be a good idea to look at this datapoint and determine if it is a problem.
+
+```{r}
+location = which.max(df$A)
+location
+```
+
+```{r}
+row_vector = df[location,]
+row_vector
+```
+
+As we can see this very small fragment has skewed the results only because of its size. It might be important to remove small protein fragments, inactive as they may be.
+
+Oddly enough, Skew and Kurtosis and not found in the base package of R. There are several packages that can be used here:
+
+1. psych: Procedures for Psychological, Psychometric, and Personality Research
+2. moments: Moments, cumulants, skewness, kurtosis and related tests
+
+I like the `psych` package because of its overall functionality but it has regular software updates, recently updated as of January 12, 2019.  The functionality of this package includes scatterplots, violin plots and as well as calculation of error bars for these graphics.
+
+```{r}
+library(psych)
+```
+
+The `describe` function within `pysch` package reports means, standard deviations, medians, min, max, range, skew, kurtosis and standard errors for integer or real data. 
+
+```{r}
+describe(df$A)
+```
+
+### Variable amino acid: A {-}
+
+| N     | mean | sd   | median | trimmed | mad | min | max | range | skew | kurtosis | se |
+|------:|-----:|-----:|-------:|--------:|----:|----:|----:|------:|-----:|---------:|---:|
+| 16952 | 0.07 | 0.03 |   0.07 | 0.07    | 0.02| 0   | 0.4 | 0.4   | 1.08 | 3.77     | 0  |
+
+A Normal Gaussian curve will have a skew of 0 and a kurtosis of 3.  If we look at the two values for mean and median we see they are very similar, indicating that they are not skewed highly.
+
+https://en.wikipedia.org/wiki/Kurtosis
+
+https://en.wikipedia.org/wiki/Skewness
+
+Skew is also known as the third moment and kurtosis is known as the fourth moment.  These can be more easily seen here.
+
+Skew:
+
+$$Skew[X] = E \left[ \left(\frac{X-\mu}{\sigma}\right)^{3}\right]$$
+
+Kurtosis:
+
+$$Kurt[X] = \gamma_1 = E \left[ \left(\frac{X-\mu}{\sigma}\right)^{4}\right]$$
+
+
+
+
+
+
+
+
+
+
+
+
+
+

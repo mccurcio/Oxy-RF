@@ -1,0 +1,175 @@
+---
+title: "O2-Binders-EDA"
+author: "Matthew Curcio"
+date: "February 3, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# O2-Binders-EDA
+
+
+cat *.csv > complete_aa.csv
+```{r include=FALSE}
+setwd("~/Desktop/ml-o2-binding-proteins/2-pipeline/7-percent-aa-composition-numbers")
+library(readr)
+protein_complete_aa <- read_csv("complete_aa.csv")
+```
+
+```{r}
+p_aa <- protein_complete_aa[-2]
+factor_aa = factor(p_aa$Class)
+head(p_aa)
+```
+
+```{r}
+tail(p_aa)
+```
+
+Check for any missing data
+```{r}
+apply(p_aa, 2, function(x) any(is.na(x)))
+```
+
+Produce table of protein types
+```{r}
+table(p_aa$Class)
+```
+
+```{r}
+prop.table(table(p_aa$Class))
+```
+
+Summary Statistics
+
+```{r}
+sum_p_aa = p_aa[-1] # Delete the 'Class' feature since that is a factor value(0:6)
+summary(sum_p_aa)
+```
+
+```{r}
+fivenum(sum_p_aa$G)
+```
+
+
+OK, Let's keep going with EDA
+
+```{r fig.height=11}
+boxplot(sum_p_aa, 
+        horizontal = TRUE, 
+        main = "Percent AA Composition Oxygen-Binding Proteins")
+```
+
+## DataExplorer
+
+Using the DataExplorer package we can a different view.
+
+```{r}
+library(DataExplorer)
+
+plot_missing(p_aa)
+```
+
+
+```{r fig.height=8, fig.width=8}
+plot_correlation(p_aa, 
+                 type="all", 
+                 title = "Correlation Plot of Percent AA Compostion")
+```
+
+## Compute the correlation matrix for the 20 AA variables
+
+```{r message=FALSE}
+library(corrplot) # produces correlation plots of variables
+```
+
+```{r}
+# Reduce total_aa data set to amino acids only NOT Class
+corrSet <- p_aa[,2:21]
+
+str(corrSet)
+```
+
+
+```{r}
+corrMatrix <- cor(corrSet) # Calculate correlation coefficients
+#corrMatrix
+```
+
+Generate (Upper) Correlation plot of Amino Acids
+
+- Combine correlogram with the significance test
+- Mark the insignificant coefficients according to the specified p-value significance level with ‘x’.
+
+```{r message=FALSE}
+library(Hmisc)
+```
+
+```{r}
+cor_aa <- rcorr(as.matrix(corrMatrix))
+M <- cor_aa$r
+p_mat <- cor_aa$P
+
+corrplot(corrMatrix, 
+         method = "color", 
+         type = "upper", 
+         order = "hclust", 
+         p.mat = p_mat, 
+         sig.level = 0.01)
+text(9, 1.7, "Correlation Plot (R^2) of AA", cex = 2)
+text(9, 4, "'X' indicate insignificant p-value (p<0.01) for Correlation")
+```
+
+## Display the Sigificant Correlation Coefficients Only:
+While leaving the insigificant values blank
+
+```{r}
+corrplot(corrMatrix, 
+         method = "number", 
+         type = "upper", 
+         order = "hclust",
+         p.mat = p_mat, 
+         sig.level = 0.01, 
+         insig = "blank")
+text(9, 1.7, "Correlation Value Plot (R^2) of AA", cex = 2)
+text(9, 3, "Numbered squares indicate significant Correlation Values given p=0.01")
+```
+
+The results from the Correlation Matrix provides us with 10 amino acids that seem to be correlated.
+
+These are: 
+
+G, P, A, I, N, K, E, M, F, Y
+OR
+Gly, Pro, Ala, Ile, Asn, Lys, Met, Phe, Tyr
+
+
+---
+
+# TO DO:
+1. Boxplots of Total AA Versus Protein Category
+2. Boxplots of M.W. of Protein Categories
+3. Violin plots 
+4. ?
+
+https://rpubs.com/oaxacamatt/exploratory_MONO
+
+
+Training models:
+https://rpubs.com/oaxacamatt/CART_20AA
+
+
+
+### Machine Set up
+```{r}
+sessionInfo()
+```
+
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+
+EOF

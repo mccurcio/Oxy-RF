@@ -1,0 +1,153 @@
+---
+title: "Caret MLBench"
+author: "Matthew Curcio"
+date: "October 18, 2017"
+output: html_document
+---
+
+https://rpubs.com/dernapo/trees
+
+## Introduction
+
+
+Libraries
+
+```{r library}
+# !diagnostics off
+library(readr)
+
+library(parallel)
+library(doParallel)
+
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+
+library(rpart) #For CART
+library(rpart.plot)
+library(caret) #For Random Forest & CART
+# library(rattle) #To plot decission plots
+
+library(randomForest) #To build Random Forest model
+library(randomForestSRC) #To build Random Forest model
+```
+
+
+Load data
+```{r}
+setwd("~/Dropbox/git_projects/random_forest/2_single_aa")
+library(readr)
+mono_aa_binary <- read_csv("total_mono_aa_binary_0_1.csv")
+```
+
+### EXPLORATORY Analysis
+
+```{r}
+# calculate correlation matrix
+correlationMatrix <- cor(mono_aa_binary[ ,2:22])
+
+# find attributes that are highly corrected (ideally >0.75)
+highlyCorrelated75 <- findCorrelation(correlationMatrix, cutoff = 0.75)
+
+# find attributes that are highly corrected (ideally >0.5)
+highlyCorrelated50 <- findCorrelation(correlationMatrix, cutoff = 0.5)
+
+# find attributes that are highly corrected (ideally >0.25)
+highlyCorrelated25 <- findCorrelation(correlationMatrix, cutoff = 0.25)
+highlyCorrelated25
+```
+
+
+```{r createDataPartition}
+train.flag <- createDataPartition(y = mono_aa_binary$Class, p = 0.8, list = FALSE)
+
+train_set      <- mono_aa_binary[ train.flag,]
+validation_set <- mono_aa_binary[-train.flag,]
+
+f_class = factor(train_set$Class)
+
+TrainData    <- train_set[ ,2:22]
+TrainClasses <- train_set[ ,1]
+```
+
+
+```{r TrainRF}
+set.seed(100)
+
+mtry <- sqrt(21)
+tunegrid <- expand.grid(.mtry=mtry)
+
+system.time(modfitRF <- caret::train(f_class ~ ., x = train_set[ ,2:22], data = train_set, method = "rf", , metric= "Accuracy", tuneGrid=tunegrid))
+```
+
+
+```{r Print_rf_model_Fit}
+modfitRF
+```
+
+
+
+
+
+
+
+```{r}
+
+#Predictions
+DTPredictions <-predict(DecTreeModel, testData, na.action = na.pass)
+# Print confusion matrix and results
+cmTree <-confusionMatrix(DTPredictions, testData$Class)
+print(cmTree)
+```
+
+```{r CARTmodel}
+modfitCart <- caret::train(Species~ ., method = "rpart", data = training)
+# plot(modfitCart$finalModel, main = "with CART model")
+
+```
+
+```{r}
+modfitCart
+
+```
+
+```{r RandomForest}
+modfitRF <- caret::train(Species~ ., method = "rf", data = training)
+#it has not sense to plot a tree for a Random Forest model
+modfitRF
+```
+
+```{r}
+set.seed(12321)
+
+#CART
+train.cart <- predict(modfitCart, newdata = training) 
+table(train.cart, training$Species)
+```
+
+```{r}
+# Misclassification rate = 1/75
+
+#Random Forest
+train.rf <- predict(modfitRF, newdata = training)
+table(train.rf, training$Species)
+```
+
+```{r CARTtable}
+set.seed(12321)
+
+pred.cart <- predict(modfitCart, newdata = Validation)
+table(pred.cart, Validation$Species)
+```
+
+```{r RFtable}
+
+pred.rf <- predict(modfitRF,newdata = Validation)
+table(pred.rf, Validation$Species)
+```
+
+
+```{r}
+sessionInfo()
+```
+
+EOF

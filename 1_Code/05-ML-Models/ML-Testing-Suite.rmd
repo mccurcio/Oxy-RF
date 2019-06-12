@@ -1,0 +1,31 @@
+---
+title: "ML-Testing-Suite.rmd"
+author: "Matthew Curcio"
+date: "February 14, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ML-Testing-Suite.rmd
+
+From Workshop:
+Introduction to Machine Learning with R from Shirin Glander 
+https://shirinsplayground.netlify.com/2018/06/intro_to_ml_workshop_heidelberg/
+
+
+```{r libraries}
+Libraries = c('readr')
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+## Import Data
+

@@ -1,0 +1,81 @@
+---
+title: "FASTA-test"
+author: "Matthew Curcio"
+date: "February 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## FASTA_2_Seq.rmd
+
+
+```{r libraries include=FALSE}
+Libraries = c("readr", "seqinr", "stringr", "dplyr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+### Read FASTA files, ONLY in .fasta, and produces Proteins in linear form in .txt files.
+
+```{r read_fasta, eval=TRUE}
+setwd("~/Desktop/ml-o2-binding-proteins/0-data/feb2019")
+
+fasta_2_sequences <- function(){
+    # PROT_DIR = "~/Dropbox/git_projects/random_forest_project/cleaning_data_step_1"
+    # setwd(PROT_DIR)
+    protein_class = c("Ery", "Hhe", "Hcy", "Hgb", "Ctrl", "Lgb", "Mgb")
+    prot_list = list.files(pattern = ".fasta$")
+    print(prot_list)
+    print(length(prot_list))
+    
+    # for loop to read sequences using seqinr:read.fasta
+    for (i in seq(length(prot_list))) {
+        prot_seq <- read.fasta(file = prot_list[i],
+                               seqtype = "AA",
+                               seqonly = TRUE,
+                               as.string = TRUE)
+        file_name <- paste("protein_class_",
+                           protein_class[i],
+                           ".txt",
+                           sep = "")
+        write.table(x = prot_seq,
+                    file = file_name,
+                    sep = "\n",
+                    col.names = FALSE,
+                    row.names = FALSE)
+    }
+    }
+
+# Run function
+fasta_2_sequences()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

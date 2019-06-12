@@ -1,0 +1,158 @@
+---
+title: "Classification of Oxygen Binding Proteins Using Random Forest Machine Learning"
+author: "Matthew Curcio"
+date: "September 28, 2017"
+output: html_document
+---
+
+### Library
+
+```{r}
+suppressMessages(library(seqinr))  # necessary for 'read.fasta'
+suppressMessages(library(stringr)) # necessary for 'str_count'
+suppressMessages(library(readr))   # necessary for 'read_csv'
+suppressMessages(library(dplyr))
+```
+
+### Read '.FASTA' files and store sequences to '.TXT'.
+
+```{r}
+read_fasta_2_txt <- function() {
+    setwd("~/Dropbox/git_projects/random_forest/0_uniprot_original_fasta")
+    o2_binders = list.files(pattern = ".fasta$")
+    # o2_binders
+    # length(o2_binders)
+    list_of_names = c("0_HomoSapien", "1_Erythrocruorin", "2_Hemerythrin",
+                      "3_Hemocyanin", "4_Leghemoglobin", "5_Myoglobin", 
+                      "6_Hemoglobin")
+    # loop to read sequences using seqinr:read.fasta
+    for (i in seq(length(o2_binders))) {
+        setwd("~/Dropbox/git_projects/random_forest/0_uniprot_original_fasta")
+        prot_seq <- read.fasta(file = o2_binders[i], seqtype = "AA", 
+                               seqonly = TRUE, as.string = TRUE)
+        file_name <- paste(list_of_names[i], "_seq_ONLY.txt", sep = "")
+        setwd("/home/mcc/Dropbox/git_projects/random_forest/1_cleaning_data")
+        write.table(x = prot_seq, file = file_name, sep  = "\n",
+                    row.names = FALSE, col.names = FALSE)
+    }
+}
+```
+
+## Percent_aa; takes a string of single letter amino acid abrevations and returns a vector of length (nrow = 1, ncol = 22) of %AA composition.  
+
+* Column 1 = Protein Class (0:6)
+* Column 2 = Total AA per protein
+* Columns 3:22; (G, P, A, V, L, I, M, C, F, Y, W, H, K, R, Q, N, E, D, S, T)
+
+```{r generate_percent_aa}
+generate_percent_aa <- function(df, protein_class) {
+    col_titles = t(c("Class", "TotalAA", "G", "P", "A", "V", "L", "I", "M",
+                     "C", "F", "Y", "W", "H", "K", "R", "Q", "N", "E", "D",
+                     "S", "T"))
+    list_of_names = c("0_HomoSapien", "1_Erythrocruorin", "2_Hemerythrin",
+                      "3_Hemocyanin", "4_Leghemoglobin", "5_Myoglobin", 
+                      "6_Hemoglobin")
+    file_name <- paste(list_of_names[i], "_mono_aa.csv", sep = "")
+    write.table(matrix(0, ncol = 22), file_name,  sep = ",", 
+                col.names = col_titles, row.names = FALSE, eol = "\n")
+    ############################################
+    aa_nums = as.vector(matrix(0, ncol = 22))
+    for (row in seq(length(df))) {
+        # First column is protein_class
+        aa_nums[1] = protein_class
+        # Second column is total number of amino acids
+        total_aa = nchar(df[1,row], keepNA = FALSE)
+        aa_nums[2] = total_aa
+        # Column 3:22 - Calculate percent AA
+        aa_nums[3] = str_count(df[1,row], "G") / total_aa
+        aa_nums[4] = str_count(df[1,row], "P") / total_aa
+        aa_nums[5] = str_count(df[1,row], "A") / total_aa
+        aa_nums[6] = str_count(df[1,row], "V") / total_aa
+        aa_nums[7] = str_count(df[1,row], "L") / total_aa
+        aa_nums[8] = str_count(df[1,row], "I") / total_aa
+        aa_nums[9] = str_count(df[1,row], "M") / total_aa
+        aa_nums[10] = str_count(df[1,row], "C") / total_aa
+        aa_nums[11] = str_count(df[1,row], "F") / total_aa
+        aa_nums[12] = str_count(df[1,row], "Y") / total_aa
+        aa_nums[13] = str_count(df[1,row], "W") / total_aa
+        aa_nums[14] = str_count(df[1,row], "H") / total_aa
+        aa_nums[15] = str_count(df[1,row], "K") / total_aa
+        aa_nums[16] = str_count(df[1,row], "R") / total_aa
+        aa_nums[17] = str_count(df[1,row], "Q") / total_aa
+        aa_nums[18] = str_count(df[1,row], "N") / total_aa
+        aa_nums[19] = str_count(df[1,row], "E") / total_aa
+        aa_nums[20] = str_count(df[1,row], "D") / total_aa
+        aa_nums[21] = str_count(df[1,row], "S") / total_aa
+        aa_nums[22] = str_count(df[1,row], "T") / total_aa
+        aa_nums = t(aa_nums)
+        # Write/append vector of AA values
+        write(aa_nums, file = file_name, append = TRUE, ncolumns = 22, sep = ",")
+    }
+}
+```
+
+```{r read_seq_csv}
+sequence_txt_to_csv <- function() {
+    CLEAN_DATA_DIR = "~/Dropbox/git_projects/random_forest_project/1_cleaning_data"
+    setwd(CLEAN_DATA_DIR)
+    protein_class = 0:6
+    o2_seqs = list.files(pattern = ".txt$")
+    for (i in seq(length(o2_seqs))) {
+        df = read.csv(file = o2_seqs[i], header = FALSE)
+        df %>% mutate_if(is.factor, as.character) -> df
+        df = t(df)
+        generate_percent_aa(df, protein_class[i])
+    }
+}
+```
+
+
+### Protein classes:
+
+0. Homo sapiens proteins - reviewed - NOT (1-6)]
+1. Erythrocruorin 
+2. Hemerythrin 
+3. Hemocyanin  
+4. Leghemoglobin
+5. Myoglobin  
+6. Hemoglobin  
+
+list_of_names = c("0_HomoSapien", "1_Erythrocruorin", "2_Hemerythrin", "3_Hemocyanin",
+                  "4_Leghemoglobin", "5_Myoglobin", "6_Hemoglobin")
+
+## Data Transformation: FASTA to Percent Mono AA Composition
+
+```{r MAIN}
+
+read_fasta_2_txt()
+sequence_txt_to_csv()
+
+```
+
+
+### CAT files
+```{r}
+#files <- list.files(pattern = "\\.csv$")
+
+# Concatenate all protein files.csv to all_classes.csv
+# cat protein_class*.csv > all_classes.csv
+
+
+# wc -l all*
+# 20786 all_classes.csv
+```
+
+### Read_csv's
+```{r read_csv}
+read_csv <- function(){
+    FILE_PATH = "~/Dropbox/git_projects/random_forest_dk_project/uniprot_1/all_classes.csv"
+    all_classes <- read_csv(FILE_PATH)
+}
+```
+
+```{r}
+# View(all_classes)
+# names(all_classes)
+
+table(is.na(all_classes$TotalAA))
+```

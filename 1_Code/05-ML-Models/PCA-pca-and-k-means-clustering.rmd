@@ -1,0 +1,160 @@
+---
+title: "PCA-pca-and-k-means-clustering.rmd"
+author: "Matthew Curcio"
+date: "February 22, 2019"
+output: html_document
+---
+
+## Title: PCA-pca-and-k-means-clustering.rmd
+
+#### Summary: https://www.r-bloggers.com/pca-and-k-means-clustering-of-delta-aircraft/
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data:
+```{r}
+colSums(is.na(class5_subset)|class5_subset == '')
+
+which(is.na(class5_subset))
+
+for(i in 1:ncol(class5_subset)){
+    class5_subset[is.na(class5_subset[,i]), i] <- mean(class5_subset[,i], na.rm = TRUE)
+}
+which(is.na(class5_subset))
+
+```
+
+
+Naively apply principal components analysis to raw data and plot
+```{r}
+start_time <- Sys.time() # Start timer
+
+#class5_subset <- class5_aa[, -c(1,2)]
+pc <- princomp(class5_subset)
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+Plot Naive PCA plot
+```{r}
+plot(pc)
+```
+
+Find Cumalative % of VAriance. What are the loadings?
+
+```{r}
+summary(pc) # 1 component has 20.89728% variance
+loadings(pc) # Can see all variance is in the range in miles 
+```
+
+The scale of the different variables is quite similar {0 <= % AA composition <= 0.4}} despite no scaling r normalization. 
+
+We can see this by plotting the variance of the different % AA composition in the class5_subset dataframe, regular scaling on the left, logarithmic on the right.
+
+Verify by plotting variance of columns
+```{r}
+mar <- par()$mar
+par(mar = mar + c(0, 5, 0, 0))
+barplot(sapply(class5_subset, var), 
+        horiz = T, 
+        main = "Bar Plots of Variances Vs. Amino Acids given 5 Class dataset",
+        las = 1, cex.names = 0.8)
+barplot(sapply(class5_subset, var), 
+        horiz = T, 
+        main = "Bar Plots of log10(Variances) Vs Amino Acids given 5 Class dataset",
+        las = 1, 
+        cex.names = 0.8, 
+        log = 'x')
+par(mar = mar)
+```
+
+
+Desppite this small difference, we can scale the data using the scale() function, then verify that the variances across the different variables are equal so that when we apply principal components one variable does not dominate. 
+```{r}
+# Scale class5 dataset
+class5_subset_scaled <- data.frame(scale(class5_subset))
+# Verify variance is uniform
+plot(sapply(class5_subset_scaled, var),
+        main = "Plot of Scaled Variances Vs. Amino Acids of 5 Class dataset")
+```
+
+After applying the scale() function the variance is now constant across variables
+
+
+
+Now we can apply principal components to the scaled data. 
+
+NOTE: this can be done by calling to the prcomp() function by setting the parameter `scale=TRUE`. 
+
+# Proceed with principal components
+```{r}
+pc <- princomp(class5_subset_scaled)
+
+plot(pc, 
+     pch = 4,
+     main = "Cumulative Proportion of Variances Vs. Principle Components",
+     type='l')
+```
+
+```{r}
+names(pc)
+```
+
+```{r}
+summary(pc) # 4 components is both 'elbow' and explains >85% variance
+```
+
+We see that the first principe component now accounts for 19.55532%, Down from 20.89728% before scaling.
+
+To Determine Cumulative % of Component analysis, USE:
+```{r}
+iPCA$sdev^2 # Variance of each component
+iPCA$sdev^2 / sum(iPCA$sdev^2) # Cumulative %
+cumsum(iPCA$sdev^2 / sum(iPCA$sdev^2)) # sum up all components
+```
+
+```{r}
+plot(cumsum(pc$sdev^2 / sum(pc$sdev^2)), 
+     pch = 4,
+     main = "Cumulative Proportion of Variances Vs. Principle Components",
+     type="b")
+```
+
+
+
+
+now we’re in business. There are various rules of thumb for selecting the number of principal components to retain in an analysis of this type, two of which I’ve read about are:
+
+- Pick the number of components which explain 85% or greater of the variation
+- Use the ‘elbow’ method of the scree plot (on right)
+
+
+
+
+
+
+
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+```{r}
+sessionInfo()
+```
+EOF

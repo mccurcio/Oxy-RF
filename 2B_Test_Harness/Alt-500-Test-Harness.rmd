@@ -34,7 +34,8 @@ test_file_name <- paste("7_class_500_test_harness_", format(Sys.time(), "%Y-%m-%
 for (i in 1:length(prot_list)) {
     line_count <- length(readLines(prot_list[i]))
     print(prot_list[i])
-    for (j in 1:500) {
+    wanted = c(700, 20, 31, 77, 486, 13, 45)
+    for (j in 1:wanted) {
         choose_index <- floor(runif(1, min = 1, max = line_count)-1)
         one_line <- read_lines(prot_list[i], skip = choose_index, n_max = 1)
         write_lines(one_line, path = test_file_name, sep = "\n", append = TRUE)
@@ -45,12 +46,4 @@ end_time <- Sys.time()   # End timer
 end_time - start_time    # Display time
 ```
 
-
-Machine Settings:
-```{r}
-Sys.info()[c(1:3,5)]
-```
-```{r}
-sessionInfo()
-```
 EOF

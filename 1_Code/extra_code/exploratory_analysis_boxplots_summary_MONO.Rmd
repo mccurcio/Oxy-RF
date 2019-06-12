@@ -1,0 +1,191 @@
+---
+title: "Exploratory Data Analysis on MONO Peptides"
+author: "Matthew Curcio"
+date: "October 3, 2017"
+output: html_document
+---
+
+```{r library}
+library(readr)
+```
+
+protein_class = c("homosapiens", "erythrocruorin", "hemerythrin",
+                      "hemocyanin", "leghemoglobin", "myoglobin",
+                      "hemoglobin")
+
+```{r homosapiens}
+protein_class_0_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_0_aa.csv")
+
+summary(protein_class_0_aa)
+```
+
+```{r erythrocruorin}
+protein_class_1_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_1_aa.csv")
+
+summary(protein_class_1_aa)
+```
+
+
+```{r}
+protein_class_2_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_2_aa.csv")
+
+summary(protein_class_2_aa)
+```
+
+
+
+```{r}
+protein_class_3_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_3_aa.csv")
+
+summary(protein_class_3_aa)
+```
+
+
+
+```{r}
+protein_class_4_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_4_aa.csv")
+
+summary(protein_class_4_aa)
+```
+
+
+
+```{r}
+protein_class_5_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_5_aa.csv")
+
+summary(protein_class_5_aa)
+```
+
+
+
+```{r}
+protein_class_6_aa <- read_csv("~/Dropbox/git_projects/random_forest/4_exploratory/mono/protein_class_6_aa.csv")
+
+summary(protein_class_6_aa)
+```
+
+## Boxplots of Total AA Versus Protein Category
+
+```{r}
+setwd("~/Dropbox/git_projects/random_forest/data")
+
+boxplot(protein_class_0_aa$TotalAA, protein_class_1_aa$TotalAA,
+        protein_class_2_aa$TotalAA, protein_class_3_aa$TotalAA,
+        protein_class_4_aa$TotalAA, protein_class_5_aa$TotalAA,
+        protein_class_6_aa$TotalAA,
+        log = "y", horizontal = FALSE,
+        names = c("homosapiens", "erythrocruorin", "hemerythrin",
+                  "hemocyanin", "leghemoglobin", "myoglobin", "hemoglobin"),
+        main = "Total AA Versus Protein Category",
+        ylab = "Total Amino Acids per Protein")
+
+# Save copy to file.
+svg(filename="boxplot_total_aa_vs_protein_category.svg")
+boxplot(protein_class_0_aa$TotalAA, protein_class_1_aa$TotalAA,
+        protein_class_2_aa$TotalAA, protein_class_3_aa$TotalAA,
+        protein_class_4_aa$TotalAA, protein_class_5_aa$TotalAA,
+        protein_class_6_aa$TotalAA,
+        log = "y", horizontal = FALSE,
+        names = c("homosapiens", "erythrocruorin", "hemerythrin",
+                  "hemocyanin", "leghemoglobin", "myoglobin", "hemoglobin"),
+        main = "Total AA Versus Protein Category",
+        ylab = "Total Amino Acids per Protein")
+dev.off()
+
+```
+
+### Due to the very low molecular weight proteins drastically changing the percent amino acid composition of some of the categories of proteins I decided to trim proteins below 26 AA in length from three categories;
+
+### After looking at the Hemoglobin file morre closely I found a protein with a count of 1156 which is not part of the normal grouping of hemoglobins.  Therefore I have trimmed this single protein as well.
+
+* homosapiens, class = 0
+* hemocyanin, class = 3
+* hemoglobin, class = 6
+
+```{r trimming_datasets}
+setwd("~/Dropbox/git_projects/random_forest/2_single_aa")
+
+trimmed_homo_sapien_class_0 = subset(protein_class_0_aa, protein_class_0_aa[,2] > 27)
+write.csv(x = trimmed_homo_sapien_class_0, 
+          file = "trimmed_homo_sapien_class_0.csv",
+          row.names = FALSE)
+
+trimmed_hemocyanin_class_4 = subset(protein_class_4_aa, protein_class_4_aa[,2] > 27)
+write.csv(x = trimmed_hemocyanin_class_4, 
+          file = "trimmed_hemocyanin_class_4.csv",
+          row.names = FALSE)
+
+trimmed_hemoglobin_class_6 = subset(protein_class_6_aa, protein_class_6_aa[,2] > 27 &
+                                    protein_class_6_aa[,2] < 1155)
+write.csv(x = trimmed_hemoglobin_class_6, 
+          file = "trimmed_hemoglobin_class_6.csv",
+          row.names = FALSE)
+```
+
+
+```{r}
+setwd("~/Dropbox/git_projects/random_forest/data")
+
+boxplot(trimmed_homo_sapien_class_0$TotalAA, protein_class_1_aa$TotalAA,
+        protein_class_2_aa$TotalAA, protein_class_3_aa$TotalAA,
+        trimmed_hemocyanin_class_4$TotalAA, protein_class_5_aa$TotalAA,
+        trimmed_hemoglobin_class_6$TotalAA,
+        log = "y", horizontal = FALSE,
+        names = c("homosapiens", "erythrocruorin", "hemerythrin",
+                  "hemocyanin", "leghemoglobin", "myoglobin", "hemoglobin"),
+        main = "Trimmed Total AA Versus Protein Category",
+        ylab = "Total Amino Acids per Protein")
+
+# Save copy to file.
+svg(filename="boxplot_total_aa_vs_protein_category.svg")
+boxplot(trimmed_homo_sapien_class_0$TotalAA, protein_class_1_aa$TotalAA,
+        protein_class_2_aa$TotalAA, protein_class_3_aa$TotalAA,
+        trimmed_hemocyanin_class_4$TotalAA, protein_class_5_aa$TotalAA,
+        trimmed_hemoglobin_class_6$TotalAA,
+        log = "y", horizontal = FALSE,
+        names = c("homosapiens", "erythrocruorin", "hemerythrin",
+                  "hemocyanin", "leghemoglobin", "myoglobin", "hemoglobin"),
+        main = "Trimmed Total AA Versus Protein Category",
+        ylab = "Total Amino Acids per Protein")
+dev.off()
+```
+
+```{r}
+summary(trimmed_homo_sapien_class_0)
+```
+
+
+```{r}
+summary(trimmed_hemocyanin_class_4)
+```
+
+
+```{r}
+summary(trimmed_hemoglobin_class_6)
+```
+
+```{r concatenate_mono_files}
+
+all_proteins_mono <- rbind.data.frame(trimmed_homo_sapien_class_0, 
+                                      protein_class_1_aa,
+                                      protein_class_2_aa, 
+                                      protein_class_3_aa,
+                                      trimmed_hemocyanin_class_4,
+                                      protein_class_5_aa,
+                                      trimmed_hemoglobin_class_6)
+
+# Change Protein Categories to ether (0,1) depending on whether they are oxygen binding or not.
+
+for (i in length(all_proteins_mono)) {
+    if (all_proteins_mono[i,1] > 1) {
+        # Change all categories to either 0 or 1
+        all_proteins_mono[i,1] = 1
+    }
+}
+
+setwd("~/Dropbox/git_projects/random_forest/5_randomForest")
+write.csv(x = all_proteins_mono, 
+          file = "trimmed_all_proteins_mono.csv",
+          row.names = FALSE)
+```
+

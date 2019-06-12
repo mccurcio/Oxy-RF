@@ -1,0 +1,78 @@
+---
+title: "PCA-dnchari-aa.rmd"
+author: "Matthew Curcio"
+date: "February 21, 2019"
+output: html_document
+---
+
+## Title: PCA-dnchari-aa.rmd
+
+#### Summary: https://rpubs.com/dnchari/pca VG
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC", "plyr", "qcc", 
+              "threejs", "rgl", "pca3d", "gridExtra")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+```{r}
+require(devtools)
+#install_github('rCharts', 'ramnathv')
+```
+
+
+Import Data:
+```{r}
+class5_aa <- read_csv("class5_aa.csv")
+View(class5_aa)
+```
+
+
+```{r}
+aa_nums <- class5_aa[,-2]
+aa_nums.norm = apply(aa_nums[,2:21], 2, function(y) y - mean(y))
+```
+
+Apply PCA
+```{r}
+pca.aa = prcomp(aa_nums.norm[,2:21], center = TRUE, scale. = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+start_time <- Sys.time() # Start timer
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+```{r}
+sessionInfo()
+```
+EOF

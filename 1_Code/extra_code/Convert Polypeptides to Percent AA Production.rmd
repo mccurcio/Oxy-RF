@@ -1,0 +1,99 @@
+---
+title: "Convert Polypeptides to Percent AA Production.rmd"
+author: "Matthew Curcio"
+date: "Feb. 12, 2019"
+output: html_document
+---
+
+
+### Produce AA matrix:  
+
+- Column 1 = protein_class = {"Ctrl", "Ery", "Hcy", "Hgb", "Hhe","Lgb", "Mgb"} 
+- Column 2 = Total AA per protein  
+- Columns 3:22 = {"G", "P", "A", "V", "L", "I", "M", "C", "F", "Y", "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T"} 
+
+Step #1: Produce table of amino acid counts from the polypeptide. One polypeptide per line
+
+```{r libraries include=FALSE}
+use_library = c("stringr", "readr", "dplyr")
+
+# Install if not present
+for(p in use_library){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+The function `peptides_counts` inputs a `.txt` file. 
+The input file must be a polypeptide / string where one protein per line.
+The output file is a `.csv` file containing the 20 amino acids counts found on each line. 
+
+```{r peptides_counts}
+
+read_seq_txt <- function() {
+    protein_class = c("Ctrl", "Ery", "Hcy", "Hgb", "Hhe","Lgb", "Mgb")
+    polypep_seqs = list.files(pattern = ".txt$")
+    for (i in seq(length(polypep_seqs))) {
+        df = read.csv(file = polypep_seqs[i], header = FALSE)
+        df %>% mutate_if(is.factor, as.character) -> df
+        df = t(df)
+        percent_aa(df, protein_class[i])
+    }
+}
+```
+
+
+
+```{r percent_aa}
+
+percent_aa <- function(df, protein_class) {
+    col_titles = t(c("Class", "TotalAA", "G", "P", "A", "V", "L", "I", "M", "C",
+                   "F", "Y", "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T"))
+    file_name <- paste("protein_class_", protein_class, "_aa.csv", sep = "")
+    write.table(col_titles, file_name,  sep = ",", 
+                col.names = FALSE, row.names = FALSE, eol = "\n")
+    ############################################
+    aa_nums = as.vector(matrix(0, ncol = 22))
+    for (row in seq(length(df))) {
+        # First column is protein_class
+        aa_nums[1] = protein_class
+        # Second column is total number of amino acids
+        total_aa = nchar(df[1,row], keepNA = FALSE)
+        aa_nums[2] = total_aa
+        # Column 3:22 - Calculate percent AA
+        aa_nums[3] = str_count(df[1,row], "G") / total_aa
+        aa_nums[4] = str_count(df[1,row], "P") / total_aa
+        aa_nums[5] = str_count(df[1,row], "A") / total_aa
+        aa_nums[6] = str_count(df[1,row], "V") / total_aa
+        aa_nums[7] = str_count(df[1,row], "L") / total_aa
+        aa_nums[8] = str_count(df[1,row], "I") / total_aa
+        aa_nums[9] = str_count(df[1,row], "M") / total_aa
+        aa_nums[10] = str_count(df[1,row], "C") / total_aa
+        aa_nums[11] = str_count(df[1,row], "F") / total_aa
+        aa_nums[12] = str_count(df[1,row], "Y") / total_aa
+        aa_nums[13] = str_count(df[1,row], "W") / total_aa
+        aa_nums[14] = str_count(df[1,row], "H") / total_aa
+        aa_nums[15] = str_count(df[1,row], "K") / total_aa
+        aa_nums[16] = str_count(df[1,row], "R") / total_aa
+        aa_nums[17] = str_count(df[1,row], "Q") / total_aa
+        aa_nums[18] = str_count(df[1,row], "N") / total_aa
+        aa_nums[19] = str_count(df[1,row], "E") / total_aa
+        aa_nums[20] = str_count(df[1,row], "D") / total_aa
+        aa_nums[21] = str_count(df[1,row], "S") / total_aa
+        aa_nums[22] = str_count(df[1,row], "T") / total_aa
+        aa_nums = t(aa_nums)
+        # Write/append vector of AA values
+        write(aa_nums, file = file_name, append = TRUE, ncolumns = 22, sep = ",")
+    }
+}
+
+# Generate single AA percent compositions
+read_seq_txt()
+
+```
+
+### At this point, the MONO-peptide files have been produced.
+
+## Continue on to DI-peptide production using file, [name.Rmd] at (location)

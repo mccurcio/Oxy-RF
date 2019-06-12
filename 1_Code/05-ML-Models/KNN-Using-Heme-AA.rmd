@@ -1,0 +1,118 @@
+---
+title: "Heme AA Using KNN"
+author: "Matthew Curcio"
+date: "February 5, 2019"
+output: html_document
+---
+
+From: https://rpubs.com/njvijay/16444
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Heme AA Using KNN
+
+Import Heme Protein Data
+```{r message=FALSE}
+library(readr)
+complete_aa <- read_csv("complete_aa.csv")
+complete_aa <- complete_aa[,-2]
+complete_aa <- factor(complete_aa$Class)
+```
+
+Caret is a valuable R package which was written in order to provide a general interface for nearly 150 ML algorithms. It also provides useful functions to produce training and testing datasets, preprocessing, evaluating the model, etc.,
+
+```{r message=FALSE}
+library(caret)
+```
+
+Split data into training and test sets. by using createDataPartition() function from caret
+```{r}
+set.seed(1000)
+
+aa_train <- createDataPartition(y = complete_aa,
+                                p = 0.8,
+                                list = FALSE)
+training <- complete_aa[ aa_train, ]
+testing  <- complete_aa[-aa_train, ]
+```
+
+
+Check distibutions of original data and partitioned data
+```{r}
+prop.table(table(training$Class)) * 100
+```
+
+```{r}
+prop.table(table(testing$Class)) * 100
+```
+
+This first trial will be carried without scaling or normalization since the values of AA composition are all <0.4.
+```{r}
+set.seed(2000)
+
+start_time <- Sys.time()
+ctrl <- trainControl(method = "repeatedcv",
+                     repeats = 3)
+end_time <- Sys.time()
+end_time - start_time
+```
+
+K-nearest neighbor calculation
+```{r}
+start_time <- Sys.time()
+knnFit <- train(Class ~ ., 
+                data = training, 
+                method = "knn", 
+                trControl = ctrl, 
+                tuneLength = 20)
+end_time <- Sys.time()
+end_time - start_time
+```
+
+
+```{r}
+#Output of kNN fit
+knnFit
+```
+
+```{r}
+Libraries = c('lattice', 'ggplot2')
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+```{r}
+plot(knnFit)
+```
+
+Find confusion matrix to see accuracy value and other parameter values
+```{r}
+knnPredict <- predict(knnFit, testing)
+
+confusionMatrix(knnPredict, testing$Class)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

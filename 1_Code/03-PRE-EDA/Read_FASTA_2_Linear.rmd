@@ -1,0 +1,44 @@
+---
+title: "Read_FASTA_2_Linear.rmd"
+author: "Matthew Curcio"
+date: "February 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read_FASTA_2_Linear.rmd
+
+```{r libraries include=FALSE}
+Libraries = c("seqinr", "dplyr", "stringr", "readr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+
+### Reads the sequence files
+```{r read_seq_file}
+
+read_seq_file <- function(){
+    FASTA_DIR = "~/Desktop/ml-o2-binding-proteins/0-data/feb2019"
+    setwd(FASTA_DIR)
+    prot_seqs = list.files(pattern = ".fasta$")
+    for (i in 1:7) {
+        df = read.csv(file = o2_seqs[i], header = FALSE)
+        df %>% mutate_if(is.factor, as.character) -> df
+    }
+    print(df)
+    #return(seq_df)
+}
+
+read_seq_file()
+```
+

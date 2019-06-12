@@ -1,0 +1,56 @@
+---
+title: "0-Convert-.FASTA-files-to-aa-strings.rmd
+author: "Matthew Curcio"
+date: "September 28, 2017"
+output: html_document
+---
+
+## Title: 0-Convert-.FASTA-files-to-aa-strings.rmd
+
+#### Summary: Converts "uniprot-([a-zA-Z]{3,4}).fasta" files to sequences of amino acids, one polypeptide per line. The files created are one file per protein classification.
+
+| Protein Class  | Code Key |
+|:---------------|:---------|
+| HS-Non-O2      | Ctrl     |
+| Erythrocruorin | Ery      |
+| Hemerythrin    | Hhe      |
+| Hemocyanin     | Hcy      |
+| Leghemoglobin  | Lgb      |
+| Myoglobin      | Mgb      |
+| Hemoglobin     | Mgb      |
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "seqinr", "stringr", "dplyr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Read "uniprot-([a-zA-Z]{3,4}).fasta" files, convert and store sequences to '.txt'.
+```{r}
+read_fasta_2_txt <- function() {
+    setwd("~/Dropbox/Oxy-RF/0_Data/1_FASTA-data")
+    getwd()
+    poly_peptides_files = list.files(pattern = ".fasta$")
+    
+    # loop to read sequences using seqinr:read.fasta
+    for (i in seq(length(poly_peptides_files))) {
+        prot_seq <- read.fasta(file = poly_peptides_files[i], 
+                               seqtype = "AA",
+                               seqonly = TRUE,
+                               as.string = TRUE)
+        file_name <- paste(poly_peptides_files[i], "_seq_ONLY.txt", sep = "")
+        setwd("/home/mcc/Dropbox/git_projects/random_forest/1_cleaning_data")
+        write.table(x = prot_seq, file = file_name, sep  = "\n",
+                    row.names = FALSE, col.names = FALSE)
+    }
+}
+```
+

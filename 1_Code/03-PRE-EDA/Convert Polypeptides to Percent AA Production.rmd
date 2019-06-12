@@ -1,0 +1,44 @@
+---
+title: "Convert Polypeptides to Percent AA Production.rmd"
+author: "Matthew Curcio"
+date: "February 12, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Convert Polypeptides to Percent AA Production.rmd
+
+
+```{r libraries include=FALSE}
+use_library = c("stringr", "readr", "dplyr")
+
+# Install if not present
+for(p in use_library){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+
+The function `peptides_counts` inputs a `.txt` file. 
+The input file must be a polypeptide/string with one polypeptide per line.
+The output file is a `.csv` file containing the 20 amino acids counts found on each line. 
+
+```{r peptides_counts}
+
+read_seq_txt <- function() {
+    protein_class = c("Ctrl", "Ery", "Hcy", "Hgb", "Hhe","Lgb", "Mgb")
+    polypep_seqs = list.files(pattern = ".txt$")
+    for (i in seq(length(polypep_seqs))) {
+        df = read.csv(file = polypep_seqs[i], header = FALSE)
+        df %>% mutate_if(is.factor, as.character) -> df
+        df = t(df)
+        percent_aa(df, protein_class[i])
+    }
+}
+```

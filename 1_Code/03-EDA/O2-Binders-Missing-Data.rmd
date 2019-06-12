@@ -1,0 +1,112 @@
+---
+title: "O2-Binders-Missing-Data"
+author: "Matthew Curcio"
+date: "February 4, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## O2-Binders-Missing-Data
+
+This section will explore situations where data is missing from a dataframe.
+
+There are several very simple options that will fill in these missing values.
+
+1. Importing Data Using 'readr' package.
+
+```{r message=FALSE, include=FALSE}
+setwd("~/Desktop/ml-o2-binding-proteins/2-pipeline/7-percent-aa-composition-numbers")
+library(readr)
+df <- read_csv("complete_aa.csv")
+```
+
+
+2. Checking for missing data can be done in several ways. 
+
+This gives us an indication that all columns are complete. In this case, command `is.na()` is a data type and in each column (e.g. 2) any are not `NA`.
+
+We see there NO missing values NOW. So I will introduce some.
+
+```{r}
+apply(df, 2, function(x) any(is.na(x)))
+```
+
+Since our dataframe Does Not contain `NA` I will add some. 
+
+When missing data is present. Generally there are several alternatives.
+
+1. You can choose not use the column(feature) or row(observation) or that particular value in your computations.
+2. Replace the missing values with the column average. This is very commonly done.
+3. Use a tool for data imputation.
+
+I will demonsrate replacing the missing data with the column average.
+
+```{r}
+head(df$TotalAA, 20)
+```
+
+Since our dataframe does not contain `NA` I will add some. 
+
+I will arbitrarily introduce `NA` at values less than 500.
+
+```{r}
+df$TotalAA[df$TotalAA < 500] <- NA
+head(df$TotalAA, 20)
+```
+
+
+
+```{r}
+head(is.na(df$TotalAA), 20)
+```
+
+A useful function for finding `NA` values in the `any` and `all` functions.
+
+```{r}
+any(is.na(df$TotalAA))  # Are ANY values `NA`
+```
+
+```{r}
+all(is.na(df$TotalAA))  # Are ALL values `NA`? Obviously not.
+```
+
+But where are the actual `NA` values in my column `df$TotalAA`? 
+```{r}
+head(which(is.na(df$TotalAA), arr.ind = TRUE))
+```
+
+The vector produced by `which` provides us with the position numbers for the `NA`s.
+
+```{r}
+mean_df = mean(df$TotalAA, na.rm = TRUE)
+mean_df
+```
+
+```{r}
+NA2mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+df[] <- lapply(df, NA2mean)
+
+head(df$TotalAA, 20)
+```
+
+Do we see that positions (1, 14, 15, 19) are replaced by the mean?
+mean
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

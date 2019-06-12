@@ -1,0 +1,82 @@
+---
+title: "RF using ParallelForest Package for muti-cpus"
+author: "Matthew Curcio"
+date: "October 11, 2017"
+output: html_document
+---
+
+```{r}
+library(randomForest)
+library(readr)
+```
+
+
+
+```{r import_dataset}
+mono_aa_set <- read_csv("~/Dropbox/git_projects/random_forest/2_single_aa/total_mono_aa_heme_notheme.csv")
+
+mono_aa_set$Class <- as.character(mono_aa_set$Class)
+mono_aa_set$Class <- as.factor(mono_aa_set$Class)
+
+head(mono_aa_set)
+```
+
+
+## Produce Training Data Set
+* training Sample with 70% dataset observations
+* 16953 * 0.7 = 11868
+
+```{r}
+set.seed(100)
+#training Sample with 11868 observations
+train=sample(1:nrow(mono_aa_set), 11868)
+head(mono_aa_set)  #to search on the dataset
+```
+
+
+```{r}
+mono_aa_set.rf = randomForest(Class ~ ., data = mono_aa_set, subset = train, ntree=1000)
+mono_aa_set.rf
+```
+
+Plotting the Error vs Number of Trees Graph.
+
+```{r}
+
+plot(mono_aa_set.rf, ylim = c(0.08, 0.17))
+
+```
+
+```{r}
+oob.err = double(21)
+test.err = double(21)
+
+# Start the clock!
+ptm <- proc.time()
+
+#mtry is no of Variables randomly chosen at each split
+for(mtry in 1:21) 
+{
+  rf=randomForest(Class ~ ., data = mono_aa_set, 
+                  subset = train, mtry = mtry, ntree = 50) 
+  
+  # Error of all Trees fitted
+  pred <- predict(rf, mono_aa_set[-train,]) 
+  # Predictions on Test Set for each Tree
+  test.err[mtry]= with(mono_aa_set[-train,], mean( (Class - pred)^2)) 
+  # Mean Squared Test Error
+  
+  cat(mtry," ") 
+  # Printing the output to the console
+}
+
+
+# Stop the clock
+proc.time() - ptm
+```
+
+
+## Show Results from Training Run
+```{r results_1}
+mono_aa_set.rf$importance
+```

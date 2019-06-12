@@ -1,0 +1,172 @@
+---
+title: "PCA-test.rmd"
+author: "MCC"
+date: "February 20, 2019"
+output: html_document
+---
+
+PCA-test.rmd
+
+###
+From:
+https://rpubs.com/njvijay/27823
+
+Consider:
+https://rpubs.com/sinhrks/plot_pca  ???Uses: ggfortify???
+https://rpubs.com/klmr/iris-pca       meh...
+https://rpubs.com/maulikpatel/231900
+https://rpubs.com/datascientiest/237405 ??
+https://rpubs.com/ryankelly/pca ????
+http://www.rpubs.com/koushikstat/pca VG
+
+https://rpubs.com/dnchari/pca VG
+https://rpubs.com/aaronsc32/eigenvalues-eigenvectors-r ??
+https://rpubs.com/aaronsc32/principal-component-analysis dense
+
+https://rpubs.com/anish20/PCA lite
+https://rpubs.com/joeflorence/pca_example interesting
+
+https://rpubs.com/ashishgopal1414/PCA nice dendrogram
+https://rpubs.com/ranvirkumarsah/Intro2PCA_EFA  pca & explor fact analysis
+
+
+#
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+all_paa <- read_csv("all_paa.csv")
+paa_numericals <- X5_class_aa[, -c(1,2)]
+```
+
+
+Before jump into PCA logic in R, I am going to define a common function which is required to display all PCA related plots in 2X2 grid.
+```{r}
+pcaCharts <- function(x) {
+    x.var <- x$sdev ^ 2
+    x.pvar <- x.var/sum(x.var)
+    print("proportions of variance:")
+    print(x.pvar)
+    
+    par(mfrow=c(2,2))
+    plot(x.pvar,
+         xlab = "Principal component", 
+         ylab = "Proportion of variance explained", 
+         ylim = c(0,1), 
+         type = 'b')
+    plot(cumsum(x.pvar),
+         xlab = "Principal component", 
+         ylab = "Cumulative Proportion of variance explained", 
+         ylim = c(0,1), 
+         type = 'b')
+    screeplot(x)
+    screeplot(x, type = "l")
+    par(mfrow = c(1,1))
+}
+```
+
+It is mandatory that data should be scaled and centered. Centering and scaling can be applied first before calling PCA R functions or PCA function (prcomp) itself has center and scale parameter. In this excercise, we are going to use prcomp parameter for preprocessing. 
+
+Using PCA, we are going to find linear combinations of the variables that maxmimal variance and mutually uncorrelated.
+
+
+Applying PCA using R function
+- Checking output of pca prcomp function returns standard deviation (sdev), rotation and loadings.
+```{r}
+start_time <- Sys.time() #Start timer
+
+paa_pca <- prcomp(paa_numericals, center = TRUE, scale = TRUE)
+
+end_time <- Sys.time()
+end_time - start_time # End timer and print
+```
+
+```{r}
+names(paa_pca)
+```
+
+
+```{r}
+print(paa_pca)
+```
+
+Above pca output returns 20 principal components as rotation. 
+Basically number of principal components in rotation is equal to number variables in the dataset.
+
+Next step is to identify coverage of variance in dataset by individual principal components. 
+Using the `summary()` function can be used or scree plot can be used to explain the variance.
+
+```{r}
+summary(paa_pca)
+```
+
+From the the summary, we can undersand PC1 explains 18.5% of variance and PC2 explains 13.2% so on. 
+Usually Principal components which explain about 95% variance can be considered for models. Summary also yields cumulative proportion of the principal components.
+
+Best thing is, plot PCA using various types of scree plot. 
+Above declared ‘pcaCharts’ function invokes various forms of the scree plot.
+
+```{r}
+pcaCharts(paa_pca)
+```
+
+Next, biplot illustrate the use of PCA on the Percent AA data sets.
+```{r}
+start_time <- Sys.time() #Start timer
+
+biplot(paa_pca, scale = 0, cex = 0.7)
+
+end_time <- Sys.time()
+end_time - start_time # End timer and print
+```
+
+It seems PCA output is symetric around the origin.
+
+The following set of R code will flip the numbers.
+```{r}
+pca.out <- paa_pca
+pca.out$rotation <- -pca.out$rotation
+pca.out$x <- -pca.out$x
+biplot(pca.out, scale = 0, cex = 0.7)
+```
+
+Interpretation of biplot:
+The plot shows the first two principal component scores and the loading verctors in a single biplot display.
+
+```{r}
+pca.out$rotation[,1:2]
+```
+
+From the rotation table, we can see that the first three amino acids (G:0.1997, P:0.2594, A:0.37349) have the highest positive values.
+
+Hence this first component roughly corresponds to three amino acids which might be considered slightly hydrophobic to hydrophobic.  It is unusal that we see Gly has very little steric hinderance while Pro is that to be one of the more highly sterically hindered amino acids.
+
+There is package called ‘ggbiplot’ available in github which yields much better illustration on PCA.
+```{r}
+library(ggbiplot)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

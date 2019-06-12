@@ -1,0 +1,62 @@
+---
+title: "Convert-.FASTA-to-linear-.txt-files.rmd"
+author: "Matthew Curcio"
+date: "March 4, 2019"
+output: html_document
+---
+
+## Title: Convert-.FASTA-to-linear-.txt-files.rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "seqinr", "stringr", "dplyr")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+#### Read 'uniprot-ctrl.fasta' and produce Proteins in linear form in .txt files.
+
+Convert 'ctrl.fasta_2_sequences':
+```{r fasta_2_sequences}
+
+start_time <- Sys.time() # Start timer
+##
+protein_class = "Ctrl"
+getwd()
+prot_seq <- read.fasta(file = "0_Data/FASTA-data/uniprot-ctrl.fasta",
+                       seqtype = "AA",
+                       seqonly = TRUE,
+                       as.string = TRUE)
+file_name <- "protein_class_ctrl.txt"
+write.table(x = prot_seq,
+            file = file_name,
+            sep = "\n",
+            col.names = FALSE,
+            row.names = FALSE)
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

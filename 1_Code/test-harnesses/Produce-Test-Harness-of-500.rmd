@@ -1,0 +1,80 @@
+---
+title: "Produce-Test-Harness-of-500.rmd"
+author: "Matthew Curcio"
+date: "March 5, 2019"
+output: html_document
+---
+
+## Title: Produce-Test-Harness-of-500.rmd
+
+#### Summary: 
+
+Libraries:
+```{r libraries, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "doMC")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+
+```{r}
+line_count <- function(prot_list[i]){
+    
+}
+```
+
+```{r}
+generate_index_500 <- function(variables) {
+}
+```
+
+```{r}
+choose_500 <- function(variables) {
+```
+
+```{r}
+write_500 <- function(variables) {
+```
+
+
+
+
+
+```{r}
+set.seed(1000)
+
+prot_list <- list.files(pattern = ".txt$")
+print(paste("Input:", length(prot_list), "files", sep=" "))
+for (i in length(prot_list)) {
+    line_count(prot_list[i])
+    generate_index_500()
+    choose_500()
+    write_500()
+    print(paste("Completed ", prot_list[i], sep = ": "))
+}
+```
+
+```{r}
+start_time <- Sys.time() # Start timer
+
+end_time <- Sys.time()   # End timer
+end_time - start_time    # Display time
+```
+
+
+
+Machine Settings:
+```{r}
+Sys.info()[c(1:3,5)]
+```
+```{r}
+sessionInfo()
+```
+EOF

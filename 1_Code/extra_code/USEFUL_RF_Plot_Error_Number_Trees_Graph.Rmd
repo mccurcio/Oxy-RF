@@ -1,0 +1,283 @@
+---
+title: "Classification of Oxygen Binding Proteins Using Random Forest Machine Learning"
+author: "Matthew Curcio"
+date: "August 16, 2017"
+output: html_document
+---
+
+## Introduction  
+
+text
+
+This work can be found on [GitHub](https://github.com/mccurcio/random_forest_dk_project) and on [RPubs](http://rpubs.com/oaxacamatt/Random_Forest_Oxygen_Binders).
+
+### Protein classes:
+
+0. Homo sapiens proteins - reviewed
+1. [Erythrocruorin](https://en.wikipedia.org/wiki/Erythrocruorin)
+2. [Hemerythrin](https://en.wikipedia.org/wiki/Hemerythrin)
+3. [Hemocyanin](https://en.wikibooks.org/wiki/Structural_Biochemistry/Hemocyanin)
+4. [Leghemoglobin](https://en.wikipedia.org/wiki/Leghemoglobin)
+5. [Myoglobin](https://en.wikipedia.org/wiki/Myoglobin)
+6. [Hemoglobin](https://en.wikipedia.org/wiki/Hemoglobin)
+
+
+### Produce AA matrix:
+
+Column 1 = Protein Class (0:6)  
+Column 2 = Total AA per protein  
+Columns 3:22; (G, P, A, V, L, I, M, C, F, Y, W, H, K, R, Q, N, E, D, S, T)  
+
+
+```{r libraires}
+suppressMessages(library(seqinr))
+suppressMessages(library(stringr))
+suppressMessages(library(readr))
+suppressMessages(library(randomForest))
+suppressMessages(library(dplyr))
+
+# devtools::install_github("MI2DataLab/randomForestExplainer")
+suppressMessages(library(randomForestExplainer))
+```
+
+### Read FASTA files and store sequences ONLY in .txt files.
+
+```{r read_fasta, eval=FALSE}
+
+fasta_2_sequences <- function() {
+    setwd("~/Dropbox/git_projects/random_forest_dk_project/uniprot_1")
+    o2_binders = list.files(pattern = ".fasta$")
+    # o2_binders
+    # length(o2_binders)
+    protein_class = c("erythrocruorin", "hemerythrin", "hemocyanin",
+                      "leghemoglobin", "myoglobin", "Homosapiens", 
+                      "hemoglobin")
+    # for loop to read sequences using seqinr:read.fasta
+    for (i in seq(length(o2_binders))) {
+    prot_seq <- read.fasta(file = o2_binders[i], seqtype = "AA", 
+                           seqonly = TRUE, as.string = TRUE)
+    # prot_seq_is.vector = is.vector(prot_seq)
+    file_name <- paste("protein_class", protein_class[i], ".txt", sep = "")
+    write.table(x = prot_seq, file = file_name, sep  = "\n",
+                row.names = FALSE, col.names = col_titles)
+    }
+}
+```
+
+### Function: percent_aa; takes a string of single letter amino acid abrevations and returns a vector of length (nrow = 1, ncol = 22) of %AA.  
+
+* cell(1,1) is the protein class, (0:6),  
+  ** protein class(0) = null sett of human proteins, see above  
+* cell(1,2) is total number of characters in string  
+* cell(1,3:22) is percent AA  
+
+
+```{r percent_aa, eval=FALSE}
+percent_aa <- function(df, protein_class) {
+    col_titles = t(c("Class", "TotalAA", "G", "P", "A", "V", "L", "I", "M", "C",
+                   "F", "Y", "W", "H", "K", "R", "Q", "N", "E", "D", "S", "T"))
+    file_name <- paste("protein_class", protein_class, ".csv", sep = "")
+    write.table(matrix(0, ncol = 22), file_name,  sep = ",", 
+    col.names = col_titles, row.names = FALSE, eol = "\n")
+    ############################################
+    aa_nums = as.vector(matrix(0, ncol = 22))
+    for (row in seq(length(df))) {
+        # First column is protein_class
+        aa_nums[1] = protein_class
+        # Second column is total number of amino acids
+        total_aa = nchar(df[1,row], keepNA = FALSE)
+        aa_nums[2] = total_aa
+        # Column 3:22 - Calculate percent AA
+        aa_nums[3] = str_count(df[1,row], "G") / total_aa
+        aa_nums[4] = str_count(df[1,row], "P") / total_aa
+        aa_nums[5] = str_count(df[1,row], "A") / total_aa
+        aa_nums[6] = str_count(df[1,row], "V") / total_aa
+        aa_nums[7] = str_count(df[1,row], "L") / total_aa
+        aa_nums[8] = str_count(df[1,row], "I") / total_aa
+        aa_nums[9] = str_count(df[1,row], "M") / total_aa
+        aa_nums[10] = str_count(df[1,row], "C") / total_aa
+        aa_nums[11] = str_count(df[1,row], "F") / total_aa
+        aa_nums[12] = str_count(df[1,row], "Y") / total_aa
+        aa_nums[13] = str_count(df[1,row], "W") / total_aa
+        aa_nums[14] = str_count(df[1,row], "H") / total_aa
+        aa_nums[15] = str_count(df[1,row], "K") / total_aa
+        aa_nums[16] = str_count(df[1,row], "R") / total_aa
+        aa_nums[17] = str_count(df[1,row], "Q") / total_aa
+        aa_nums[18] = str_count(df[1,row], "N") / total_aa
+        aa_nums[19] = str_count(df[1,row], "E") / total_aa
+        aa_nums[20] = str_count(df[1,row], "D") / total_aa
+        aa_nums[21] = str_count(df[1,row], "S") / total_aa
+        aa_nums[22] = str_count(df[1,row], "T") / total_aa
+        aa_nums = t(aa_nums)
+        # Write/append vector of AA values
+        write(aa_nums, file = file_name, append = TRUE, ncolumns = 22, sep = ",")
+    }
+}
+
+```
+
+
+```{r read_seq_txt, eval=FALSE}
+
+read_seq_txt <- function() {
+    uniprot_dir = "~/Dropbox/git_projects/random_forest_dk_project/uniprot_1"
+    setwd(uniprot_dir)
+    protein_class = 0:6
+    o2_seqs = list.files(pattern = ".txt$")
+    for (i in seq(length(o2_seqs))) {
+        df = read.csv(file = o2_seqs[i], header = FALSE)
+        df %>% mutate_if(is.factor, as.character) -> df
+        df = t(df)
+        percent_aa(df, protein_class[i])
+    }
+}
+
+```
+
+
+```{r misc, eval=FALSE}
+
+#files <- list.files(pattern = "\\.csv$")
+
+# Concatenate all protein files.csv to all_classes.csv
+# cat protein_class*.csv > all_classes.csv
+
+
+# wc -l all*
+# 20786 all_classes.csv
+
+```
+
+```{r import_data}
+
+library(readr)
+FILE_PATH = "~/Dropbox/git_projects/random_forest_dk_project/uniprot_1/all_classes.csv"
+all_classes <- read_csv(FILE_PATH)
+
+# View(all_classes)
+# names(all_classes)
+
+table(is.na(all_classes$TotalAA))
+
+# max = max(all_classes, na.rm=TRUE)
+# min = min(all_classes, na.rm=TRUE)
+# mean = mean(all_classes, na.rm = TRUE)
+# 
+# is_numeric = is.numeric(all_classes)
+# 
+# median = median(all_classes, na.rm = TRUE)
+# mode = mode(all_classes, na.rm = TRUE)
+# 
+# # Initial investigation of "all_classes" dataset.
+# barplot(table(all_classes$TotalAA))
+```
+
+The data set 'all_classes' has the following structure:
+```{r data_structure}
+str(all_classes)
+
+```
+
+## Training the Random Forest
+
+We will use all the Predictors in the dataset.
+
+Before we build our model, let’s separate our data into testing and training sets. This will place 75% of the observations of the original dataset into 'train' and the remaining 25% of the observations into 'test.'  
+
+Total number of samples from "all_classes.csv" = 20786 observations  
+75% of 20786 = 15589.5  
+Therefore, training sample = 15590 observations  
+
+### Seperating Training and Test Sets
+```{r train}
+set.seed(123)
+train = sample(1:nrow(all_classes), 15590)
+
+# Start the clock!
+ptm <- proc.time()
+
+all_classes.rf = randomForest(Class ~ . , data = all_classes , subset = train)
+all_classes.rf
+
+cat("\n")
+# Stop the clock
+cat ("Run time:" , (proc.time() - ptm), "sec")
+
+```
+
+# Plotting the Error vs Number of Trees Graph.  
+```{r plot}
+
+plot(all_classes.rf, main = "MS Error of Resisduals Vs Number of Trees Produced",
+     col = "dark red")
+```
+
+This plot shows the MS Error Vs. the Number of Trees. We can notice that the Error drops as the program adds more trees then averages them. At 400 trees the MSE is at a plateau.
+
+===================================
+
+Now we can compare the **Out of Bag Sample Errors and Error** on Test set.
+
+The above Random Forest model chose Randomly 7 variables to be considered at each split. We could now try all possible 20 predictors which can be found at each split.  
+
+**mtry**	  
+Number of variables randomly sampled as candidates at each split. Note that the default values are classification (sqrt(p) where p is number of variables in x) and regression (p/3)   
+===================================  
+
+```{r mtry=20}
+# Start the clock!
+ptm <- proc.time()
+
+oob.err = double(20)
+test.err = double(20)
+
+#mtry is no of Variables randomly chosen at each split
+for(mtry in 1:20) {
+    rf = randomForest(Class ~ . ,
+                      data = all_classes,
+                      subset = train,
+                      mtry = mtry,
+                      ntree = 400,
+                      localImp = TRUE,
+                      importance = TRUE)
+    
+    oob.err[mtry] = rf$mse[400] #Error of all Trees fitted
+    
+    pred <- predict(rf, all_classes[-train, ]) 
+    #Predictions on Test Set for each Tree
+    
+    test.err[mtry] = with(all_classes[-train, ], mean((Class - pred) ^ 2)) 
+    #Mean Squared Test Error
+    
+    cat(mtry, " ") 
+    #print the output to the console
+}
+
+cat ("\n")
+# Stop the clock
+cat ("Run time:" , (proc.time() - ptm)/60, "minutes")
+```
+
+
+```{r test.err}
+# Test Error
+test.err
+```
+
+```{r oob.err}
+oob.err
+```
+
+What happens is that we are growing 400 trees for 20 times i.e. for all 20 predictors.
+
+Plotting both Test Error and Out of Bag Error
+```{r matplot}
+
+matplot(1:mtry, cbind(oob.err,test.err), 
+        pch = 19, col = c("red","blue"), type = "b", 
+        ylab = "Mean Squared Error",
+        xlab = "Number Of Predictors Considered At Each Split")
+legend("topright", legend = c("Out of Bag Error", "Test Error"),
+       pch = 19, col = c("red", "blue"))
+```
+

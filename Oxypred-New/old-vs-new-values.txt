@@ -1,0 +1,16 @@
+# | Class          | In Oxypred | % Max Acc | as of 2/2019
+--|---------------:|-----------:|----------:|-----------:
+1 | erythrocruorin | 20         | 95.8%     | 560
+2 | hemerythrin    | 31         | 97.5      | 40763
+3 | hemocyanin     | 77         |  97.5     | 3329
+4 | hemoglobin     | 486        | 96.9      | 32538
+5 | leghemoglobin  | 13         | 99.4      | 125
+6 | myoglobin      | 45         | 96.0      | 1124
+7 | ctrl           | 700        | -         | 1216
+
+
+SVM light (http://www.cs.cornell.edu/people/tj/svm light/). The software enables users to define a number of parameters as well as inbuilt kernel functions such as linear kernel, radial basis function and polynomial kernel (of a given degree).
+
+In order to obtain a high-quality dataset, we removed all those proteins annotated as “fragments”, “isoforms”, “potentials”, “similarity”, or “probables”, and created a non-redundant dataset.
+
+c(700, 20, 31, 77, 486, 13, 45)

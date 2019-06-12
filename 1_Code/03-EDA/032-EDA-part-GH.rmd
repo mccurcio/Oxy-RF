@@ -1,0 +1,138 @@
+---
+title: "033-EDA-part-GH.rmd"
+author: "Matthew Curcio"
+date: "February 19, 2019"
+output: html_document
+---
+
+## Title: 033-EDA-part-GH.rmd
+
+#### Summary: {-}
+
+- G - Histograms
+- H - 2D Plots: Scatter plots, Lattice / paired 2D plots
+- I - Interactive Rotating 3D plots
+
+Libraries:
+```{r libraries, echo=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+Libraries = c("readr", "lattice", "ggplot2")
+
+# Install if not present
+for(p in Libraries){
+    if(!require(p, character.only = TRUE))
+        install.packages(p)
+    library(p, character.only = TRUE)
+}
+```
+
+Import Data:
+```{r, message=FALSE}
+all_paa <- read_csv("/home/mcc/Desktop/ml-o2-binding-proteins/2-pipeline/Feb2019_protein_classes/all_paa.csv")
+Classes = factor(all_paa$Class)
+```
+
+### Histograms
+
+This next secttion will explore the characteristics of the amino acid dataset with respect to 2D plots. This will allow us to look for correlations between features.
+
+We will start with histograms, `hist()`:
+```{r}
+par(mfrow=c(1,2))
+for (i in 3:4) {
+    hist(all_paa[[i]],
+         freq = FALSE,
+         col = "pink",
+         main = paste("% Probability Histogram of AA:" , colnames(all_paa)[i]),
+         xlab = "%AA Composition",
+         ylab = "% Probability",
+         xlim = c(0, 0.4),
+         ylim = c(0,20))
+}
+```
+
+---
+
+#### Simple Plot Options {-}
+
+| Description | Example |
+|-------------|---------|
+| Main Title & Sub-Titles |`main = "TITLE", sub = "subtitle"` |
+| X & Y<br>Axis Labels |`xlab = "bottom", ylab = "left-side"` |
+| X & Y<br>Axis Limits |`xlim = c(0,10), ylim = c(0,10)`<br><br>If no limits are set, default values will be used.<br>. |
+| Use Log scales |`xlog = TRUE, ylog = TRUE` |
+| Line Type |  [img[lty = 1:6|http://www.statmethods.net/advgraphs/images/lines.png]]<br>OR TRY:<br>`plot (child, parent, type="l", lty=0:6)` |
+| Line Width |`lwd = 2` |
+| Color |`col = ff0000` |
+| ''pch'' Magnification Factor  |`cex = 2` (default = 1) |
+
+---
+
+
+Simple Scatterplot
+```{r}
+plot(x = all_paa[[3]], 
+     y = all_paa[[4]], 
+     main = "Simple Scatterplot of G vs. P",
+     xlab = "AA: G", 
+     ylab = "AA: P", 
+     pch = 4) 
+```
+
+## Move to Appendix
+## If you are looking for different symbols to use if is easy enough to add a simple chart.
+
+```{r}
+plot(0:25, pch=0:25)
+```
+
+### Quantile-Quantile plot 
+
+QQ plots are useful for determining normality:
+```{r}
+par(mfrow=c(1,2))
+for (i in 3:4) {
+    qqnorm(all_paa[[i]],
+           main = paste("QQ Plot of AA:" , colnames(all_paa)[i]))
+    qqline(all_paa[[i]])
+}
+```
+
+By the looks at these graphics, the distributions of amino acids is NOT normal. To determine the correctt distrubution would take more investigation.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### Machine Settings
+
+```{r}
+Sys.info()[c(1:3,5,7)]
+```
+
+```{r}
+sessionInfo()
+```
+
+EOF
