@@ -1,1 +1,219 @@
-This paper discusses the use of Random Forest Machine Learning as an alternative to SVM with respect to Oxygen binding proteins
+This work investigate the use of Random Forest Machine Learning as an alternative to SVM with respect to Oxygen binding proteins
+
+.
+|-- 0_Data
+|   |-- FASTA-data
+|   |   |-- readme.md
+|   |   |-- uniprot-erythrocruorin.fasta
+|   |   |-- uniprot-hemerythrin.fasta
+|   |   |-- uniprot-hemocyanin.fasta
+|   |   |-- uniprot-hemoglobin.fasta
+|   |   |-- uniprot-human+NOT+hemoglobin+NOT+myoglobin+random.fasta
+|   |   |-- uniprot-leghemoglobin.fasta
+|   |   `-- uniprot-myoglobin.fasta
+|   |-- complete_aa.csv
+|   |-- pAA-composition-data
+|   |   |-- complete_aa.csv
+|   |   |-- protein_class_0_aa.csv
+|   |   |-- protein_class_1_aa.csv
+|   |   |-- protein_class_2_aa.csv
+|   |   |-- protein_class_3_aa.csv
+|   |   |-- protein_class_4_aa.csv
+|   |   |-- protein_class_5_aa.csv
+|   |   `-- protein_class_6_aa.csv
+|   `-- readme.md
+|-- 1_Code
+|   |-- 0-Convert-.FASTA-files-to-aa-strings.rmd
+|   |-- 03-EDA
+|   |   |-- 031-EDA-part-ABCD.rmd
+|   |   |-- 032-EDA-part-EF.html
+|   |   |-- 032-EDA-part-EF.rmd
+|   |   |-- 032-EDA-part-GH.html
+|   |   |-- 032-EDA-part-GH.rmd
+|   |   |-- O2-Binders-Boxplots.html
+|   |   |-- O2-Binders-Boxplots.rmd
+|   |   |-- O2-Binders-EDA.html
+|   |   |-- O2-Binders-EDA.rmd
+|   |   |-- O2-Binders-Missing-Data.rmd
+|   |   |-- PCA-dnchari-aa.rmd
+|   |   |-- PCA-test.rmd
+|   |   `-- class5_aa.csv
+|   |-- 03-PRE-EDA
+|   |   |-- BEST-2-18-19-aa-2-percent-comp.rmd
+|   |   |-- Convert\ Polypeptides\ to\ Percent\ AA\ Production.rmd
+|   |   |-- Read_FASTA_2_Linear.rmd
+|   |   |-- data_prep_for_mono_peptide_clean_files.Rmd
+|   |   |-- data_transformation_aa_2_perc_comp.Rmd
+|   |   |-- fasta_2_seq.rmd
+|   |   |-- fasta_2_seq_production.rmd
+|   |   `-- find_average_protein_length.rmd
+|   |-- 05-ML-Models
+|   |   |-- 050-ml-knn-caret-perc-aa-data.rmd
+|   |   |-- 051-ml-C5.0-caret-5class.rmd
+|   |   |-- 051-ml-caret-5class.rmd
+|   |   |-- 10_11_17_RF_test.Rmd
+|   |   |-- 10_23_CARET_cart_rf_mono_aa.Rmd
+|   |   |-- KNN-Using-Heme-AA.rmd
+|   |   |-- ML-Testing-Suite.rmd
+|   |   |-- PCA-pca-and-k-means-clustering.rmd
+|   |   `-- complete_aa.csv
+|   |-- Convert-.FASTA-to-linear-.txt-files-earlier.rmd
+|   |-- Convert-.FASTA-to-linear-.txt-files.rmd
+|   |-- Generate-500unit-test-harness-Gamma.rmd
+|   |-- Generate-500unit-test-harness.rmd
+|   |-- Generate-500unit-test-harness2.rmd
+|   |-- data_prep_for_mono_peptide_clean_files.Rmd
+|   |-- extra_code
+|   |   |-- Convert\ Polypeptides\ to\ Percent\ AA\ Production.rmd
+|   |   |-- GOOD_data_prep_Produce_mono_peptide_PercentAA.Rmd
+|   |   |-- NEW_data_prep_Produce_mono_peptide_PercentAA.Rmd
+|   |   |-- RF_OO_Sample_Errors_mono_aa.Rmd
+|   |   |-- USEFUL_RF_Plot_Error_Number_Trees_Graph.Rmd
+|   |   |-- data_cleaning_PerAA.Rmd
+|   |   |-- data_prep_Produce_mono_peptide_PercentAA.Rmd
+|   |   `-- exploratory_analysis_boxplots_summary_MONO.Rmd
+|   `-- test-harnesses
+|       |-- Convert-ctrl.FASTA-to-linear-ctrl.txt-files.rmd
+|       |-- Gen-500-Test-Harness.beta.rmd
+|       |-- Gen-500-Test-Harness.rmd
+|       |-- Generate-500unit-test-harness.beta.rmd
+|       |-- Generate-500unit-test-harness.rmd
+|       |-- Generate-500unit-test-harness2.rmd
+|       |-- Produce-Test-Harness-of-500.rmd
+|       `-- _test_harness.txt
+|-- 2-pipeline
+|   |-- 5_class_aa.csv
+|   `-- Feb2019_protein_classes
+|       |-- VLarge_perc_aa_values
+|       |   |-- all_paa.csv
+|       |   |-- ery_paa.csv
+|       |   |-- hcy_paa.csv
+|       |   |-- hgb_paa.csv
+|       |   |-- hhe_paa.csv
+|       |   |-- lgb_paa.csv
+|       |   `-- mgb_paa.csv
+|       |-- perc_aa_values
+|       |   |-- pro_class_Ctrl_aa.csv
+|       |   |-- pro_class_Ery_aa.csv
+|       |   |-- pro_class_Hcy_aa.csv
+|       |   |-- pro_class_Hgb_aa.csv
+|       |   |-- pro_class_Hhe_aa.csv
+|       |   |-- pro_class_Lgb_aa.csv
+|       |   `-- pro_class_Mgb_aa.csv
+|       `-- single_line_aa_seq
+|           |-- protein_class_Ctrl.txt
+|           |-- protein_class_Ctrl_aa.csv
+|           |-- protein_class_Ery.txt
+|           |-- protein_class_Ery_aa.csv
+|           |-- protein_class_Hcy.txt
+|           |-- protein_class_Hcy_aa.csv
+|           |-- protein_class_Hgb.txt
+|           |-- protein_class_Hgb_aa.csv
+|           |-- protein_class_Hhe.txt
+|           |-- protein_class_Hhe_aa.csv
+|           |-- protein_class_Lgb.txt
+|           |-- protein_class_Lgb_aa.csv
+|           |-- protein_class_Mgb.txt
+|           |-- protein_class_Mgb_aa.csv
+|           `-- single_line_aa_seq.7z
+|-- 2B_Test_Harness
+|   |-- Alt-500-Test-Harness.html
+|   |-- Alt-500-Test-Harness.pdf
+|   |-- Alt-500-Test-Harness.rmd
+|   |-- protein_class_Ctrl.txt
+|   |-- protein_class_Ery.txt
+|   |-- protein_class_Hcy.txt
+|   |-- protein_class_Hgb.txt
+|   |-- protein_class_Hhe.txt
+|   |-- protein_class_Lgb.txt
+|   `-- protein_class_Mgb.txt
+|-- 2C_Single_AA_2_Percent_Composition
+|   |-- 7_class_500_test_harness_2019-03-22_12-33-09-AM.lst
+|   `-- Produce_Single_AA_Percent_Composition.rmd
+|-- 2_EDA
+|   |-- EDA-Part1-Oxygen-binding.html
+|   |-- EDA-Part1-Oxygen-binding.rmd
+|   |-- EDA-Part2-Oxygen-binding.html
+|   |-- EDA-Part2-Oxygen-binding.rmd
+|   `-- complete_aa.csv
+|-- 3_RF_w_Test_Harness
+|   |-- Intial-Scouting-Random-Forest-of-AA-USING-Test-Harness.html
+|   |-- Intial-Scouting-Random-Forest-of-AA-USING-Test-Harness.rmd
+|   |-- README
+|   |-- Random-Forest-of-AA-on-Test-Harness_w_Scale_Center.html
+|   |-- Random-Forest-of-AA-on-Test-Harness_w_Scale_Center.rmd
+|   `-- Random_Forest_of_AA.rmd
+|-- 4_RF_Tuning_w_mtry
+|   |-- Tuning_RF_with_mtry.html
+|   |-- Tuning_RF_with_mtry.rmd
+|   `-- test_harness_paa.csv
+|-- 5_RF_Tuning_w_ntree
+|   |-- Tuning_RF_Using_ntree.rmd
+|   |-- Tuning_RF_Using_ntree_mtry.html
+|   |-- Tuning_RF_Using_ntree_mtry.rmd
+|   |-- Tuning_RF_Using_ntree_mtry_cache
+|   |   `-- html
+|   |       |-- __packages
+|   |       |-- factor_07cb3309191e58620503f9cc24ef0e1b.RData
+|   |       |-- factor_07cb3309191e58620503f9cc24ef0e1b.rdb
+|   |       |-- factor_07cb3309191e58620503f9cc24ef0e1b.rdx
+|   |       |-- import_f2bbf2e459c40fe0e6ce5ba968c0c78d.RData
+|   |       |-- import_f2bbf2e459c40fe0e6ce5ba968c0c78d.rdb
+|   |       |-- import_f2bbf2e459c40fe0e6ce5ba968c0c78d.rdx
+|   |       |-- partition_9b81bae848be65f838a77479f7b9600a.RData
+|   |       |-- partition_9b81bae848be65f838a77479f7b9600a.rdb
+|   |       |-- partition_9b81bae848be65f838a77479f7b9600a.rdx
+|   |       |-- train_c63cf7efc8447c65c80d084de2b603c1.RData
+|   |       |-- train_c63cf7efc8447c65c80d084de2b603c1.rdb
+|   |       |-- train_c63cf7efc8447c65c80d084de2b603c1.rdx
+|   |       |-- unnamed-chunk-1_2731b43f07f54ac672209840d88fb977.RData
+|   |       |-- unnamed-chunk-1_2731b43f07f54ac672209840d88fb977.rdb
+|   |       |-- unnamed-chunk-1_2731b43f07f54ac672209840d88fb977.rdx
+|   |       |-- unnamed-chunk-2_59574e433cb4dd83b717db327dd06352.RData
+|   |       |-- unnamed-chunk-2_59574e433cb4dd83b717db327dd06352.rdb
+|   |       |-- unnamed-chunk-2_59574e433cb4dd83b717db327dd06352.rdx
+|   |       |-- unnamed-chunk-3_fd7e65156519642fc1a62bb33c9ab9aa.RData
+|   |       |-- unnamed-chunk-3_fd7e65156519642fc1a62bb33c9ab9aa.rdb
+|   |       `-- unnamed-chunk-3_fd7e65156519642fc1a62bb33c9ab9aa.rdx
+|   `-- test_harness_paa.csv
+|-- 6_Test_Harness_2
+|   |-- 7_class_500_test_harness_2019-06-11_10-44-46-PM.lst
+|   |-- 7_class_500_test_harness_2019-06-11_10-54-10-PM.lst
+|   |-- Oxypred-Test-Harness-Generator.rmd
+|   |-- Test-Harness-2.rmd
+|   |-- protein_class_Ctrl.LST
+|   |-- protein_class_Ery.txt
+|   |-- protein_class_Hcy.txt
+|   |-- protein_class_Hgb.txt
+|   |-- protein_class_Hhe.txt
+|   |-- protein_class_Lgb.txt
+|   `-- protein_class_Mgb.txt
+|-- Articles
+|   |-- Analysis-And-Prediction-Of-Major-Blood-Proteins-Based-On-Their-Amino-Acid-And-Dipeptide-Composition.pdf
+|   |-- BacHbpred-SVM-Methods-for-the-Prediction-of-Bacterial-Hemoglobin-Like-Proteins.pdf
+|   |-- Bioinformatics-Tools-and-Methods-in-Identifying-Anticancer-Peptides.pdf
+|   |-- Harnessing-the-evolutionary-information-on-oxygen-binding-proteins-through-SVM-based-modules.pdf
+|   |-- IJSRP-Paper-Matt-Curcio-ML-wrt-O2-binding-Enzymes.docx
+|   |-- IJSRP-paper-submission-format-double-column-TEMPLATE.odt
+|   |-- MCC-Using-Random-Forest-To-Investigate-Protein-Classification.docx
+|   |-- MCC-Using-Random-Forest-To-Investigate-Protein-Classification.pdf
+|   |-- Oxypred-Prediction-and-Classification.pdf
+|   |-- PROSET-A\ FAST\ PROCEDURE\ TO\ CREATE.pdf
+|   |-- Proposal_project.odt
+|   |-- Relative-Amino-Acid-Composition-Signatures-of-Organisms-and-Environments.PDF
+|   `-- SVM-based-multiclassprediction-with-basic-statistical-analysis-ofplasminogen-activators.pdf
+|-- OxyRF.Rproj
+|-- Oxypred-New
+|   `-- old-vs-new-values.txt
+|-- README
+|-- README.2
+`-- Test-Harness-2-PAA
+    |-- 7_class_500_test_harness_2019-03-22_12-33-09-AM.lst
+    |-- Produce_Single_AA_Percent_Composition.rmd
+    |-- Produce_Single_AA_Percent_Composition_Beta.rmd
+    |-- Produce_Single_AA_Percent_Composition_Gamma.html
+    |-- Produce_Single_AA_Percent_Composition_Gamma.rmd
+    |-- Produce_Single_AA_Percent_Composition_delta.rmd
+    `-- test_harness_paa.csv
+
+26 directories, 188 files
